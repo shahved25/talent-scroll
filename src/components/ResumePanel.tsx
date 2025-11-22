@@ -155,7 +155,7 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
         <div className="h-screen w-full flex items-center justify-center bg-black">
           <div className="w-full max-w-[56.25vh] px-4">
             <AspectRatio ratio={9 / 16}>
-              <div className="h-full w-full overflow-auto bg-white rounded-xl">
+              <div className="h-full w-full overflow-y-auto overflow-x-hidden bg-white rounded-xl scrollbar-hide">
                 <Document
                   file={candidate.resumeUrl}
                   onLoadSuccess={onDocumentLoadSuccess}
@@ -169,14 +169,16 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
                       <p>Failed to load PDF. Please try again.</p>
                     </div>
                   }
-                  className="h-full"
+                  className="flex flex-col items-center"
                 >
                   {Array.from(new Array(numPages), (el, index) => (
                     <Page
                       key={`page_${index + 1}`}
                       pageNumber={index + 1}
                       className="mb-2"
-                      width={Math.min(window.innerWidth * 0.9, 600)}
+                      width={Math.min(window.innerWidth - 48, window.innerHeight * 0.5625 - 48)}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
                     />
                   ))}
                 </Document>
