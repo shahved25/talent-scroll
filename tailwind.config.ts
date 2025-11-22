@@ -94,6 +94,18 @@ export default {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 20px hsl(160 100% 45% / 0.3)" },
+          "50%": { boxShadow: "0 0 30px hsl(160 100% 45% / 0.6), 0 0 60px hsl(160 100% 45% / 0.3)" },
+        },
+        "cyber-flicker": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.8" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-100% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -101,6 +113,8 @@ export default {
         "heart-pop": "heart-pop 0.5s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "cyber-flicker": "cyber-flicker 3s ease-in-out infinite",
       },
     },
   },

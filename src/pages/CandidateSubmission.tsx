@@ -110,20 +110,23 @@ const CandidateSubmission = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      {/* Cyber grid background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#0a4b3c10_1px,transparent_1px),linear-gradient(to_bottom,#0a4b3c10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+      
+      <div className="relative container mx-auto px-4 py-8 max-w-2xl">
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
-          className="mb-6"
+          className="mb-6 hover:bg-primary/10"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+          <span className="font-mono">BACK</span>
         </Button>
 
-        <div className="bg-card border border-border rounded-lg p-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Submit Your Profile</h1>
-          <p className="text-muted-foreground mb-8">
-            Share your information to get discovered by potential employers
+        <div className="bg-card/50 backdrop-blur-sm border-2 border-primary/30 rounded-lg p-8 hover:border-primary/50 transition-all">
+          <h1 className="text-3xl font-bold text-primary mb-2 tracking-wide">SUBMIT_PROFILE</h1>
+          <p className="text-muted-foreground mb-8 font-mono">
+            &gt; Upload_credentials_for_discovery
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -208,15 +211,15 @@ const CandidateSubmission = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full"
+              className="w-full font-mono tracking-wide"
               size="lg"
             >
               {isSubmitting ? (
-                <>Submitting...</>
+                <>UPLOADING...</>
               ) : (
                 <>
                   <Upload className="mr-2 h-4 w-4" />
-                  Submit Profile
+                  SUBMIT_PROFILE
                 </>
               )}
             </Button>
