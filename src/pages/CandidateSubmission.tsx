@@ -38,15 +38,6 @@ const CandidateSubmission = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.categoryId) {
-      toast({
-        title: "Missing category",
-        description: "Please select a category",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     if (!resumeFile || !videoFile) {
       toast({
         title: "Missing files",
@@ -101,49 +92,27 @@ const CandidateSubmission = () => {
 
       if (insertError) throw insertError;
 
-      // Analyze resume and video with Lovable AI in parallel
+      // Analyze resume with Lovable AI and update score
       const selectedCategory = categories.find(c => c.id === formData.categoryId);
       if (candidateData && selectedCategory) {
         try {
-          // Start both analyses in parallel
-          const [resumeAnalysis, videoAnalysis] = await Promise.allSettled([
-            supabase.functions.invoke('analyze-resume', {
-              body: {
-                resumeUrl,
-                candidateName: formData.name,
-                category: selectedCategory.name,
-              }
-            }),
-            supabase.functions.invoke('transcribe-and-grade-video', {
-              body: {
-                videoUrl,
-                candidateName: formData.name,
-                category: selectedCategory.name,
-              }
-            })
-          ]);
+          const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-resume', {
+            body: {
+              resumeUrl,
+              candidateName: formData.name,
+              category: selectedCategory.name,
+            }
+          });
 
-          const updates: any = {};
-
-          // Handle resume score
-          if (resumeAnalysis.status === 'fulfilled' && resumeAnalysis.value.data?.score) {
-            updates.resume_score = resumeAnalysis.value.data.score;
-          }
-
-          // Handle video score
-          if (videoAnalysis.status === 'fulfilled' && videoAnalysis.value.data?.score) {
-            updates.video_score = videoAnalysis.value.data.score;
-          }
-
-          // Update candidate with both scores
-          if (Object.keys(updates).length > 0) {
+          if (!analysisError && analysisData?.score) {
+            // Update candidate with resume score
             await supabase
               .from('candidates')
-              .update(updates)
+              .update({ resume_score: analysisData.score })
               .eq('id', candidateData.id);
           }
         } catch (error) {
-          console.error('Error analyzing resume/video:', error);
+          console.error('Error analyzing resume:', error);
           // Continue even if analysis fails
         }
       }
