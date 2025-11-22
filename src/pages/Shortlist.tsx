@@ -242,16 +242,17 @@ const Shortlist = () => {
             setShowResumeModal(false);
             setSelectedCandidate(null);
           }}
-          candidate={{
-            id: selectedCandidate.id,
-            name: selectedCandidate.candidate_name,
-            category: selectedCandidate.candidate_role,
-            videoUrl: selectedCandidate.video_url,
-            resumeUrl: selectedCandidate.resume_url,
-            thumbnailUrl: selectedCandidate.thumbnail_url,
-            skillTags: selectedCandidate.skill_tags,
-            resumeScore: selectedCandidate.resume_score || null,
-          }}
+            candidate={{
+              id: selectedCandidate.id,
+              name: selectedCandidate.candidate_name,
+              category: selectedCandidate.candidate_role,
+              videoUrl: selectedCandidate.video_url,
+              resumeUrl: selectedCandidate.resume_url,
+              thumbnailUrl: selectedCandidate.thumbnail_url,
+              skillTags: selectedCandidate.skill_tags,
+              resumeScore: selectedCandidate.resume_score || null,
+              videoScore: null, // Video score not stored in shortlist table
+            }}
         />
       )}
     </div>

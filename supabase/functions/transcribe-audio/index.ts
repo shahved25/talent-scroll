@@ -73,6 +73,33 @@ Deno.serve(async (req) => {
 
     console.log('Transcription saved for candidate:', candidateId);
 
+    // Trigger video analysis after transcription
+    console.log('Triggering video analysis...');
+    try {
+      const videoAnalysisResponse = await fetch(`${supabaseUrl}/functions/v1/analyze-video`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          transcription,
+          candidateId,
+          candidateName: 'Candidate', // Could be passed from client
+          category: 'General' // Could be passed from client
+        })
+      });
+
+      if (videoAnalysisResponse.ok) {
+        console.log('Video analysis completed successfully');
+      } else {
+        console.error('Video analysis failed:', await videoAnalysisResponse.text());
+      }
+    } catch (analysisError) {
+      console.error('Error triggering video analysis:', analysisError);
+      // Don't fail the transcription if analysis fails
+    }
+
     return new Response(
       JSON.stringify({ success: true, transcription }),
       { 
