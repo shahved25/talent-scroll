@@ -20,26 +20,15 @@ serve(async (req) => {
     const { videoUrl, candidateName, category } = await req.json();
     
     console.log('Analyzing video for:', candidateName, 'Category:', category);
-
-    // Fetch the video file
-    const videoResponse = await fetch(videoUrl);
-    if (!videoResponse.ok) {
-      throw new Error('Failed to fetch video file');
-    }
-
-    // Convert video to base64
-    const videoBlob = await videoResponse.blob();
-    const videoBuffer = await videoBlob.arrayBuffer();
-    const base64Video = btoa(
-      String.fromCharCode(...new Uint8Array(videoBuffer))
-    );
+    console.log('Video URL:', videoUrl);
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Use Lovable AI to transcribe and analyze the video
+    // Use Lovable AI with Gemini 2.5 Pro to analyze the video directly
+    // Gemini can process video files and extract audio/transcription
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -47,7 +36,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
           {
             role: 'user',
@@ -58,29 +47,28 @@ serve(async (req) => {
 
 Candidate Name: ${candidateName}
 
-Please:
-1. Transcribe the entire video word-for-word
+Please analyze this video and:
+1. Extract and transcribe all spoken audio word-for-word
 2. Evaluate the candidate's presentation from a recruiter's perspective
 3. Provide a score from 1-100 based on:
-   - Communication clarity and confidence
-   - Professionalism and presentation
-   - Relevance to the ${category} role
-   - Enthusiasm and engagement
-   - Overall impression
+   - Communication clarity and confidence (25 points)
+   - Professionalism and presentation (25 points)
+   - Relevance to the ${category} role (25 points)
+   - Enthusiasm and engagement (25 points)
 
-Return your response in this EXACT JSON format:
+Return your response in this EXACT JSON format (no markdown, just pure JSON):
 {
-  "transcription": "full transcription here",
-  "feedback": "brief feedback on strengths and areas for improvement",
+  "transcription": "full word-for-word transcription of what was said",
+  "feedback": "2-3 sentence feedback highlighting key strengths and one area for improvement",
   "score": 75
 }
 
-Be fair but critical. Only exceptional candidates should score above 85.`
+Be fair but critical. Only exceptional candidates should score above 85. Average candidates should score 60-75.`
               },
               {
                 type: 'image_url',
                 image_url: {
-                  url: `data:video/mp4;base64,${base64Video}`
+                  url: videoUrl
                 }
               }
             ]
@@ -88,6 +76,8 @@ Be fair but critical. Only exceptional candidates should score above 85.`
         ]
       }),
     });
+
+    console.log('AI Response status:', aiResponse.status);
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
