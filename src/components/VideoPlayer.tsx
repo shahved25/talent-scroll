@@ -41,7 +41,7 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
     }
   }, [isActive]);
 
-  const handleDoubleTap = async (e: React.TouchEvent | React.MouseEvent) => {
+  const handleDoubleTap = async (e: React.TouchEvent) => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTapTime.current;
 
@@ -52,6 +52,11 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
     }
 
     lastTapTime.current = currentTime;
+  };
+
+  const handleDoubleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await handleShortlist();
   };
 
   const handleShortlist = async () => {
@@ -136,7 +141,7 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
         handleTouchEnd(e);
         handleDoubleTap(e);
       }}
-      onDoubleClick={handleDoubleTap}
+      onDoubleClick={handleDoubleClick}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
