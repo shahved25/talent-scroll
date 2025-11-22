@@ -4,6 +4,7 @@ import { Heart, X, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Document, Page, pdfjs } from 'react-pdf';
+import { ResumeScore } from "@/components/ResumeScore";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
