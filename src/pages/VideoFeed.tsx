@@ -4,7 +4,7 @@ import { ArrowLeft, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
 import ResumePanel from "@/components/ResumePanel";
-import { supabase } from "@/integrations/supabase/client";
+import { getCandidatesByCategory } from "@/data/mockData";
 import type { Candidate } from "@/data/mockData";
 
 const VideoFeed = () => {
@@ -16,53 +16,10 @@ const VideoFeed = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchCandidates = async () => {
-      if (!category) return;
-
-      const { data: categoryData } = await supabase
-        .from("categories")
-        .select("id")
-        .eq("slug", category)
-        .single();
-
-      if (!categoryData) {
-        setCandidates([]);
-        return;
-      }
-
-      const { data: candidateCategories } = await supabase
-        .from("candidate_categories")
-        .select("candidate_id")
-        .eq("category_id", categoryData.id);
-
-      if (!candidateCategories || candidateCategories.length === 0) {
-        setCandidates([]);
-        return;
-      }
-
-      const candidateIds = candidateCategories.map((cc) => cc.candidate_id);
-
-      const { data: candidatesData } = await supabase
-        .from("candidates")
-        .select("*")
-        .in("id", candidateIds);
-
-      if (candidatesData) {
-        const formattedCandidates: Candidate[] = candidatesData.map((c) => ({
-          id: c.id,
-          name: c.name,
-          role: c.role,
-          category: category,
-          videoUrl: c.video_url,
-          resumeUrl: c.resume_url,
-          thumbnailUrl: c.thumbnail_url || "",
-          skillTags: c.skill_tags || [],
-        }));
-        setCandidates(formattedCandidates);
-      }
-    };
-
-    fetchCandidates();
+    if (category) {
+      const categoryCandidates = getCandidatesByCategory(category);
+      setCandidates(categoryCandidates);
+    }
   }, [category]);
 
   const handleScroll = () => {
