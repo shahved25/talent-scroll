@@ -92,11 +92,12 @@ const CandidateSubmission = () => {
 
       if (insertError) throw insertError;
 
-      // Analyze resume with Lovable AI and update score
+      // Analyze resume and video with Lovable AI and update scores
       const selectedCategory = categories.find(c => c.id === formData.categoryId);
       if (candidateData && selectedCategory) {
+        // Analyze resume
         try {
-          const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-resume', {
+          const { data: resumeAnalysisData, error: resumeAnalysisError } = await supabase.functions.invoke('analyze-resume', {
             body: {
               resumeUrl,
               candidateName: formData.name,
@@ -104,16 +105,34 @@ const CandidateSubmission = () => {
             }
           });
 
-          if (!analysisError && analysisData?.score) {
-            // Update candidate with resume score
+          if (!resumeAnalysisError && resumeAnalysisData?.score) {
             await supabase
               .from('candidates')
-              .update({ resume_score: analysisData.score })
+              .update({ resume_score: resumeAnalysisData.score })
               .eq('id', candidateData.id);
           }
         } catch (error) {
           console.error('Error analyzing resume:', error);
-          // Continue even if analysis fails
+        }
+
+        // Analyze video
+        try {
+          const { data: videoAnalysisData, error: videoAnalysisError } = await supabase.functions.invoke('analyze-video', {
+            body: {
+              videoUrl,
+              candidateName: formData.name,
+              category: selectedCategory.name,
+            }
+          });
+
+          if (!videoAnalysisError && videoAnalysisData?.score) {
+            await supabase
+              .from('candidates')
+              .update({ video_score: videoAnalysisData.score })
+              .eq('id', candidateData.id);
+          }
+        } catch (error) {
+          console.error('Error analyzing video:', error);
         }
       }
 
