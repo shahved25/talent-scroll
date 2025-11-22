@@ -3,7 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Heart, X, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Candidate } from "@/data/mockData";
+
+interface Candidate {
+  id: string;
+  name: string;
+  role: string;
+  videoUrl: string;
+  resumeUrl: string;
+  thumbnailUrl?: string;
+  skillTags: string[];
+}
 
 interface ResumePanelProps {
   isOpen: boolean;
