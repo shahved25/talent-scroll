@@ -18,7 +18,12 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY is not configured');
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Download the video file (Whisper can transcribe directly from video)
@@ -35,11 +40,11 @@ Deno.serve(async (req) => {
     formData.append('file', videoBlob, 'video.mp4');
     formData.append('model', 'whisper-1');
 
-    // Send to Lovable AI for transcription
-    const transcriptionResponse = await fetch('https://ai.gateway.lovable.dev/v1/audio/transcriptions', {
+    // Send to OpenAI Whisper for transcription
+    const transcriptionResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
       },
       body: formData,
     });
