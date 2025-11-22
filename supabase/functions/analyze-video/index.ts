@@ -5,12 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface VideoAnalysis {
-  score: number;
-  transcription: string;
-  feedback: string;
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -27,8 +21,28 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Use Lovable AI with Gemini 2.5 Pro to analyze the video directly
-    // Gemini can process video files and extract audio/transcription
+    // Fetch video and convert to base64 for Gemini
+    const videoResponse = await fetch(videoUrl);
+    if (!videoResponse.ok) {
+      throw new Error('Failed to fetch video file');
+    }
+
+    const videoBlob = await videoResponse.blob();
+    const videoBuffer = await videoBlob.arrayBuffer();
+    
+    // Convert to base64 in chunks to avoid memory issues
+    const uint8Array = new Uint8Array(videoBuffer);
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
+      binary += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    const videoBase64 = btoa(binary);
+
+    console.log('Video size:', videoBuffer.byteLength, 'bytes');
+
+    // Use Gemini 2.5 Pro with tool calling for structured output
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -43,37 +57,53 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `You are an expert recruiter evaluating a candidate's video introduction for a ${category} position.
+                text: `You are an expert recruiter. Analyze this video introduction from ${candidateName} applying for a ${category} position. 
 
-Candidate Name: ${candidateName}
+Transcribe all spoken content and evaluate based on:
+- Communication clarity and confidence (25 points)
+- Professionalism and presentation (25 points)  
+- Relevance to ${category} role (25 points)
+- Enthusiasm and engagement (25 points)
 
-Please analyze this video and:
-1. Extract and transcribe all spoken audio word-for-word
-2. Evaluate the candidate's presentation from a recruiter's perspective
-3. Provide a score from 1-100 based on:
-   - Communication clarity and confidence (25 points)
-   - Professionalism and presentation (25 points)
-   - Relevance to the ${category} role (25 points)
-   - Enthusiasm and engagement (25 points)
-
-Return your response in this EXACT JSON format (no markdown, just pure JSON):
-{
-  "transcription": "full word-for-word transcription of what was said",
-  "feedback": "2-3 sentence feedback highlighting key strengths and one area for improvement",
-  "score": 75
-}
-
-Be fair but critical. Only exceptional candidates should score above 85. Average candidates should score 60-75.`
+Provide honest, constructive feedback. Average scores should be 60-75. Only exceptional candidates score above 85.`
               },
               {
                 type: 'image_url',
                 image_url: {
-                  url: videoUrl
+                  url: `data:video/mp4;base64,${videoBase64}`
                 }
               }
             ]
           }
-        ]
+        ],
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'analyze_video',
+              description: 'Analyze a candidate video and provide structured feedback',
+              parameters: {
+                type: 'object',
+                properties: {
+                  transcription: {
+                    type: 'string',
+                    description: 'Full word-for-word transcription of spoken content'
+                  },
+                  feedback: {
+                    type: 'string',
+                    description: '2-3 sentences highlighting key strengths and one improvement area'
+                  },
+                  score: {
+                    type: 'number',
+                    description: 'Score from 1-100 based on the evaluation criteria'
+                  }
+                },
+                required: ['transcription', 'feedback', 'score']
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'analyze_video' } }
       }),
     });
 
@@ -92,32 +122,24 @@ Be fair but critical. Only exceptional candidates should score above 85. Average
     }
 
     const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error('No content received from AI');
+    const toolCall = aiData.choices[0]?.message?.tool_calls?.[0];
+    
+    if (!toolCall) {
+      console.error('No tool call in response:', JSON.stringify(aiData));
+      throw new Error('Invalid AI response structure');
     }
 
-    // Parse the JSON response
-    let analysisResult: VideoAnalysis;
-    try {
-      // Clean up markdown code blocks if present
-      const cleanedContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      analysisResult = JSON.parse(cleanedContent);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', content);
-      throw new Error('Failed to parse AI analysis response');
+    const analysis = JSON.parse(toolCall.function.arguments);
+
+    // Validate and clamp score
+    if (analysis.score < 1 || analysis.score > 100) {
+      analysis.score = Math.max(1, Math.min(100, analysis.score));
     }
 
-    // Validate score is within range
-    if (analysisResult.score < 1 || analysisResult.score > 100) {
-      analysisResult.score = Math.max(1, Math.min(100, analysisResult.score));
-    }
-
-    console.log('Analysis complete:', analysisResult.score);
+    console.log('Video analysis complete:', analysis.score);
 
     return new Response(
-      JSON.stringify(analysisResult),
+      JSON.stringify(analysis),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
@@ -129,7 +151,9 @@ Be fair but critical. Only exceptional candidates should score above 85. Average
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : 'Unknown error occurred',
-        score: 0 
+        score: 0,
+        transcription: '',
+        feedback: 'Unable to analyze video at this time.'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
