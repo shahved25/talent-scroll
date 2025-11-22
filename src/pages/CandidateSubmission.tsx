@@ -38,6 +38,15 @@ const CandidateSubmission = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.categoryId) {
+      toast({
+        title: "Missing category",
+        description: "Please select a category",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!resumeFile || !videoFile) {
       toast({
         title: "Missing files",
