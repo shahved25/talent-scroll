@@ -129,32 +129,43 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
         onMouseUp={handleMouseUp}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-primary/20 bg-background/95 backdrop-blur-md px-6 py-4 animate-fade-in">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="gap-2 hover:scale-110 transition-transform duration-300"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+        <div className="border-b border-primary/20 bg-background/95 backdrop-blur-md animate-fade-in">
+          <div className="flex items-center justify-between px-6 py-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="gap-2 hover:scale-110 transition-transform duration-300"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
 
-          <div className="flex-1 text-center animate-scale-in" style={{ animationDelay: '0.1s' }}>
-            <h2 className="text-xl font-bold text-primary tracking-wide">
-              {candidate.name.toUpperCase()}
-            </h2>
-            <p className="text-sm text-muted-foreground font-mono">&gt; {candidate.category}</p>
+            <div className="flex-1 text-center">
+              <h2 className="text-xl font-bold text-primary tracking-wide">
+                {candidate.name.toUpperCase()}
+              </h2>
+              <p className="text-sm text-muted-foreground font-mono">&gt; {candidate.category}</p>
+            </div>
+
+            <Button 
+              onClick={handleShortlist} 
+              className="gap-2 hover:scale-110 transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-accent via-primary to-accent bg-[length:200%_100%] animate-gradient-x opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
+              <Heart className="h-4 w-4 relative z-10" />
+              <span className="hidden sm:inline relative z-10">SHORTLIST</span>
+            </Button>
           </div>
-
-          <Button 
-            onClick={handleShortlist} 
-            className="gap-2 hover:scale-110 transition-all duration-300 animate-scale-in relative overflow-hidden group"
-            style={{ animationDelay: '0.2s' }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-accent via-primary to-accent bg-[length:200%_100%] animate-gradient-x opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
-            <Heart className="h-4 w-4 relative z-10" />
-            <span className="hidden sm:inline relative z-10">SHORTLIST</span>
-          </Button>
+          
+          {/* Resume Score in header */}
+          <div className="px-6 pb-4">
+            <ResumeScore 
+              resumeUrl={candidate.resumeUrl}
+              candidateName={candidate.name}
+              category={candidate.category}
+              variant="detailed"
+            />
+          </div>
         </div>
 
         {/* PDF Viewer */}
