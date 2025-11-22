@@ -1,4 +1,6 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import PDFParser from 'https://esm.sh/pdf-parse@1.1.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,51 +24,51 @@ Deno.serve(async (req) => {
     
     console.log('Analyzing resume for:', candidateName, 'Category:', category);
 
+    const groqApiKey = Deno.env.get('GROQ_API_KEY');
+    if (!groqApiKey) {
+      throw new Error('GROQ_API_KEY is not configured');
+    }
+
     // Fetch the resume PDF
     const resumeResponse = await fetch(resumeUrl);
     if (!resumeResponse.ok) {
       throw new Error('Failed to fetch resume');
     }
     
-    const resumeBlob = await resumeResponse.blob();
-    const resumeBuffer = await resumeBlob.arrayBuffer();
+    const resumeBuffer = await resumeResponse.arrayBuffer();
     
-    // Convert to base64 in chunks to avoid stack overflow
-    const uint8Array = new Uint8Array(resumeBuffer);
-    let binaryString = '';
-    const chunkSize = 8192;
+    // Extract text from PDF
+    console.log('Extracting text from PDF...');
+    const pdfData = await PDFParser(new Uint8Array(resumeBuffer));
+    const resumeText = pdfData.text;
     
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
-      binaryString += String.fromCharCode.apply(null, Array.from(chunk));
-    }
-    
-    const resumeBase64 = btoa(binaryString);
+    console.log('Text extracted, length:', resumeText.length);
 
-    // Call Groq AI with vision support via Lovable AI Gateway for PDF analysis
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) {
-      throw new Error('LOVABLE_API_KEY not configured');
-    }
-
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Analyze with Groq AI
+    const aiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'Authorization': `Bearer ${groqApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           {
+            role: 'system',
+            content: `You are an expert technical recruiter analyzing resumes for ${category} positions.`
+          },
+          {
             role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `You are an expert technical recruiter analyzing a resume for a ${category} position.
+            content: `Analyze this resume text and provide a comprehensive evaluation:
 
-Analyze this resume and provide:
+RESUME TEXT:
+${resumeText}
 
+POSITION: ${category}
+CANDIDATE: ${candidateName}
+
+Provide:
 1. An overall score (0-100) based on:
    - Technical skills relevance (30%)
    - Experience quality and relevance (30%)
@@ -74,8 +76,8 @@ Analyze this resume and provide:
    - Projects and achievements (15%)
    - Resume presentation and clarity (10%)
 
-2. Top 3-4 strengths (brief bullet points)
-3. Top 3-4 areas for improvement (brief bullet points)
+2. Top 3-4 key strengths (specific bullet points)
+3. Top 3-4 areas for improvement (actionable bullet points)
 4. A concise 2-3 sentence summary
 
 Respond ONLY with valid JSON in this exact format:
@@ -85,23 +87,16 @@ Respond ONLY with valid JSON in this exact format:
   "improvements": ["Add more metrics", "Include certifications"],
   "summary": "Strong candidate with relevant experience."
 }`
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:application/pdf;base64,${resumeBase64}`
-                }
-              }
-            ]
           }
         ],
-        max_tokens: 1000
+        temperature: 0.5,
+        max_tokens: 1500
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('Lovable AI error:', errorText);
+      console.error('Groq AI error:', errorText);
       throw new Error(`AI API error: ${aiResponse.status}`);
     }
 
