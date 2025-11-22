@@ -52,6 +52,7 @@ export type Database = {
       }
       candidates: {
         Row: {
+          category_id: string | null
           created_at: string
           id: string
           name: string
@@ -62,6 +63,7 @@ export type Database = {
           video_url: string
         }
         Insert: {
+          category_id?: string | null
           created_at?: string
           id?: string
           name: string
@@ -72,6 +74,7 @@ export type Database = {
           video_url: string
         }
         Update: {
+          category_id?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -81,7 +84,15 @@ export type Database = {
           updated_at?: string
           video_url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "candidates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categories: {
         Row: {

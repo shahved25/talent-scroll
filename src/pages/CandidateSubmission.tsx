@@ -78,30 +78,17 @@ const CandidateSubmission = () => {
         .getPublicUrl(videoPath);
 
       // Insert candidate
-      const { data: candidateData, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('candidates')
         .insert({
           name: formData.name,
+          category_id: formData.categoryId,
           resume_url: resumeUrl,
           video_url: videoUrl,
           skill_tags: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
-        })
-        .select()
-        .single();
+        });
 
       if (insertError) throw insertError;
-
-      // Link candidate to category
-      if (candidateData && formData.categoryId) {
-        const { error: linkError } = await supabase
-          .from('candidate_categories')
-          .insert({
-            candidate_id: candidateData.id,
-            category_id: formData.categoryId,
-          });
-
-        if (linkError) throw linkError;
-      }
 
       toast({
         title: "Success!",

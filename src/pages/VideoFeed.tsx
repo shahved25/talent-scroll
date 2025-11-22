@@ -30,41 +30,27 @@ const VideoFeed = () => {
 
       const { data: categoryData } = await supabase
         .from('categories')
-        .select('id')
+        .select('id, name')
         .eq('slug', category)
         .single();
 
       if (!categoryData) return;
 
       const { data } = await supabase
-        .from('candidate_categories')
-        .select(`
-          candidates (
-            id,
-            name,
-            video_url,
-            resume_url,
-            thumbnail_url,
-            skill_tags
-          ),
-          categories (
-            name
-          )
-        `)
+        .from('candidates')
+        .select('id, name, video_url, resume_url, thumbnail_url, skill_tags')
         .eq('category_id', categoryData.id);
 
       if (data) {
-        const formattedCandidates = data
-          .filter(item => item.candidates)
-          .map((item: any) => ({
-            id: item.candidates.id,
-            name: item.candidates.name,
-            category: item.categories?.name || '',
-            videoUrl: item.candidates.video_url,
-            resumeUrl: item.candidates.resume_url,
-            thumbnailUrl: item.candidates.thumbnail_url,
-            skillTags: item.candidates.skill_tags || [],
-          }));
+        const formattedCandidates = data.map((candidate) => ({
+          id: candidate.id,
+          name: candidate.name,
+          category: categoryData.name,
+          videoUrl: candidate.video_url,
+          resumeUrl: candidate.resume_url,
+          thumbnailUrl: candidate.thumbnail_url,
+          skillTags: candidate.skill_tags || [],
+        }));
         setCandidates(formattedCandidates);
       }
     };
