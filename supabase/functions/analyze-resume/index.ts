@@ -108,8 +108,17 @@ Respond ONLY with valid JSON in this exact format:
     const aiData = await aiResponse.json();
     const content = aiData.choices[0].message.content;
     
+    // Strip markdown code blocks if present
+    let jsonContent = content.trim();
+    if (jsonContent.startsWith('```')) {
+      // Remove opening ```json or ```
+      jsonContent = jsonContent.replace(/^```(?:json)?\n?/, '');
+      // Remove closing ```
+      jsonContent = jsonContent.replace(/\n?```$/, '');
+    }
+    
     // Parse the JSON response
-    const analysis: ResumeAnalysis = JSON.parse(content);
+    const analysis: ResumeAnalysis = JSON.parse(jsonContent.trim());
     
     console.log('Analysis complete:', analysis.score);
 
