@@ -19,6 +19,7 @@ interface Candidate {
   thumbnailUrl: string | null;
   skillTags: string[];
   resumeScore: number | null;
+  videoScore: number | null;
 }
 
 interface ResumePanelProps {
@@ -145,7 +146,21 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
               {candidate.name.toUpperCase()}
             </h2>
             <p className="text-sm text-muted-foreground font-mono mb-2">&gt; {candidate.category}</p>
-            <ResumeScore score={candidate.resumeScore} variant="detailed" />
+            <div className="flex gap-4 justify-center">
+              <ResumeScore score={candidate.resumeScore} variant="detailed" />
+              {candidate.videoScore && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="text-4xl font-bold text-blue-400 animate-scale-in">
+                      {candidate.videoScore}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground font-mono">VIDEO SCORE</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <Button 

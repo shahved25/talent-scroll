@@ -92,27 +92,49 @@ const CandidateSubmission = () => {
 
       if (insertError) throw insertError;
 
-      // Analyze resume with Lovable AI and update score
+      // Analyze resume and video with Lovable AI in parallel
       const selectedCategory = categories.find(c => c.id === formData.categoryId);
       if (candidateData && selectedCategory) {
         try {
-          const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-resume', {
-            body: {
-              resumeUrl,
-              candidateName: formData.name,
-              category: selectedCategory.name,
-            }
-          });
+          // Start both analyses in parallel
+          const [resumeAnalysis, videoAnalysis] = await Promise.allSettled([
+            supabase.functions.invoke('analyze-resume', {
+              body: {
+                resumeUrl,
+                candidateName: formData.name,
+                category: selectedCategory.name,
+              }
+            }),
+            supabase.functions.invoke('transcribe-and-grade-video', {
+              body: {
+                videoUrl,
+                candidateName: formData.name,
+                category: selectedCategory.name,
+              }
+            })
+          ]);
 
-          if (!analysisError && analysisData?.score) {
-            // Update candidate with resume score
+          const updates: any = {};
+
+          // Handle resume score
+          if (resumeAnalysis.status === 'fulfilled' && resumeAnalysis.value.data?.score) {
+            updates.resume_score = resumeAnalysis.value.data.score;
+          }
+
+          // Handle video score
+          if (videoAnalysis.status === 'fulfilled' && videoAnalysis.value.data?.score) {
+            updates.video_score = videoAnalysis.value.data.score;
+          }
+
+          // Update candidate with both scores
+          if (Object.keys(updates).length > 0) {
             await supabase
               .from('candidates')
-              .update({ resume_score: analysisData.score })
+              .update(updates)
               .eq('id', candidateData.id);
           }
         } catch (error) {
-          console.error('Error analyzing resume:', error);
+          console.error('Error analyzing resume/video:', error);
           // Continue even if analysis fails
         }
       }
