@@ -171,9 +171,9 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
           )}
 
           {/* Candidate Info */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-            <h2 className="mb-2 text-3xl font-bold drop-shadow-lg">{candidate.name}</h2>
-            <p className="mb-4 text-lg text-white/90 drop-shadow-md">{candidate.category}</p>
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-white bg-gradient-to-t from-black via-black/80 to-transparent">
+            <h2 className="mb-2 text-3xl font-bold drop-shadow-lg text-primary tracking-wide">{candidate.name}</h2>
+            <p className="mb-4 text-lg text-secondary/90 drop-shadow-md font-mono">{candidate.category}</p>
             
             {/* Skill Tags */}
             <div className="mb-6 flex flex-wrap gap-2">
@@ -181,7 +181,7 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className="bg-white/20 text-white backdrop-blur-sm border-white/30"
+                  className="bg-primary/20 text-primary backdrop-blur-sm border border-primary/40 font-mono text-xs"
                 >
                   {tag}
                 </Badge>
@@ -189,23 +189,23 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
             </div>
 
             {/* Instructions */}
-            <div className="flex items-center justify-between text-sm text-white/80">
+            <div className="flex items-center justify-between text-sm text-muted-foreground font-mono">
               <div className="flex items-center gap-2">
-                <Heart className="h-4 w-4" />
-                <span>Double tap to shortlist</span>
+                <Heart className="h-4 w-4 text-accent" />
+                <span>DOUBLE_TAP</span>
               </div>
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>Swipe right for resume</span>
+                <FileText className="h-4 w-4 text-secondary" />
+                <span>SWIPE_RIGHT</span>
               </div>
             </div>
           </div>
 
           {/* Shortlist Indicator */}
           {isShortlisted && (
-            <div className="absolute top-6 right-6 flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-white shadow-lg">
+            <div className="absolute top-6 right-6 flex items-center gap-2 rounded-full bg-accent/90 backdrop-blur-sm px-4 py-2 text-white shadow-[0_0_20px_hsl(280_100%_60%/0.5)] border border-accent animate-glow-pulse">
               <Heart className="h-5 w-5 fill-current" />
-              <span className="font-medium">Shortlisted</span>
+              <span className="font-medium font-mono tracking-wide">SHORTLISTED</span>
             </div>
           )}
 

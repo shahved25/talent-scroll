@@ -78,40 +78,44 @@ const Shortlist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
+    <div className="min-h-screen bg-background">
+      {/* Cyber grid background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#0a4b3c10_1px,transparent_1px),linear-gradient(to_bottom,#0a4b3c10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+      
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <header className="relative border-b border-primary/20 bg-background/50 backdrop-blur-md">
         <div className="container mx-auto flex items-center gap-4 px-6 py-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
+            className="hover:bg-primary/10"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-foreground">
-            Shortlist ({candidates.length})
+          <h1 className="text-2xl font-bold text-primary tracking-wider font-mono">
+            SHORTLIST_({candidates.length})
           </h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="relative container mx-auto px-6 py-8">
         {candidates.length === 0 ? (
           <div className="flex min-h-[60vh] items-center justify-center">
             <div className="text-center">
-              <p className="text-xl text-muted-foreground mb-4">
-                No candidates shortlisted yet
+              <p className="text-xl text-muted-foreground mb-4 font-mono">
+                &gt; NO_CANDIDATES_SHORTLISTED
               </p>
               <Button onClick={() => navigate("/")}>
-                Browse Candidates
+                BROWSE_CANDIDATES
               </Button>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {candidates.map((candidate) => (
-              <Card key={candidate.id} className="overflow-hidden group">
+              <Card key={candidate.id} className="overflow-hidden group border-2 border-primary/30 bg-card/50 backdrop-blur-sm hover:border-primary hover:shadow-[0_0_30px_hsl(160_100%_45%/0.2)] transition-all">
                 {/* Thumbnail */}
                 <div className="relative aspect-[3/4] overflow-hidden bg-muted">
                   {candidate.thumbnail_url ? (
@@ -121,33 +125,33 @@ const Shortlist = () => {
                       className="h-full w-full object-cover transition-transform group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20">
                       <span className="text-6xl">👤</span>
                     </div>
                   )}
                   
                   {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-black/0 transition-all group-hover:bg-black/40" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
 
                 {/* Info */}
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-foreground mb-1">
-                    {candidate.candidate_name}
+                <div className="p-6 border-t border-primary/20">
+                  <h3 className="text-xl font-bold text-primary mb-1 tracking-wide">
+                    {candidate.candidate_name.toUpperCase()}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {candidate.candidate_role}
+                  <p className="text-sm text-muted-foreground mb-4 font-mono">
+                    &gt; {candidate.candidate_role}
                   </p>
 
                   {/* Skill Tags */}
                   <div className="mb-4 flex flex-wrap gap-2">
                     {candidate.skill_tags.slice(0, 3).map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
+                      <Badge key={tag} variant="secondary" className="text-xs bg-primary/20 text-primary border border-primary/40 font-mono">
                         {tag}
                       </Badge>
                     ))}
                     {candidate.skill_tags.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs bg-secondary/20 text-secondary border border-secondary/40 font-mono">
                         +{candidate.skill_tags.length - 3}
                       </Badge>
                     )}
@@ -158,20 +162,20 @@ const Shortlist = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 gap-2"
+                      className="flex-1 gap-2 font-mono"
                       onClick={() => window.open(candidate.video_url, "_blank")}
                     >
                       <Play className="h-4 w-4" />
-                      Video
+                      PLAY
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 gap-2"
+                      className="flex-1 gap-2 font-mono"
                       onClick={() => handleViewResume(candidate)}
                     >
                       <FileText className="h-4 w-4" />
-                      Resume
+                      VIEW
                     </Button>
                     <Button
                       variant="ghost"

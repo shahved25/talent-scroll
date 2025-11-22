@@ -15,12 +15,12 @@ const categoryIcons: Record<string, string> = {
 };
 
 const categoryColors: Record<string, string> = {
-  "ui-designer": "from-purple-500 to-pink-500",
-  "backend-engineer": "from-blue-500 to-cyan-500",
-  "frontend-developer": "from-green-500 to-teal-500",
-  "product-manager": "from-orange-500 to-red-500",
-  "data-scientist": "from-indigo-500 to-purple-500",
-  "devops-engineer": "from-yellow-500 to-orange-500",
+  "ui-designer": "from-primary via-secondary to-accent",
+  "backend-engineer": "from-secondary via-primary to-accent",
+  "frontend-developer": "from-primary via-accent to-secondary",
+  "product-manager": "from-accent via-secondary to-primary",
+  "data-scientist": "from-secondary via-accent to-primary",
+  "devops-engineer": "from-primary via-secondary to-accent",
 };
 
 const Index = () => {
@@ -39,45 +39,48 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
+    <div className="min-h-screen bg-background">
+      {/* Cyber grid background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#0a4b3c10_1px,transparent_1px),linear-gradient(to_bottom,#0a4b3c10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+      
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <header className="relative border-b border-primary/20 bg-background/50 backdrop-blur-md">
         <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
-              <Users className="h-5 w-5 text-primary-foreground" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 border border-primary/50 animate-glow-pulse">
+              <Users className="h-5 w-5 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Recruiter TikTok</h1>
+            <h1 className="text-2xl font-bold text-primary tracking-wider">TALENT_SCOUT</h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => navigate("/submit")}
-              className="gap-2"
+              className="gap-2 font-mono"
             >
               <Upload className="h-4 w-4" />
-              <span>Submit Profile</span>
+              <span>UPLOAD</span>
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate("/shortlist")}
-              className="gap-2"
+              className="gap-2 font-mono"
             >
-              <Heart className="h-4 w-4 text-accent" />
-              <span>Shortlist</span>
+              <Heart className="h-4 w-4" />
+              <span>SHORTLIST</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
-        <div className="mb-12 text-center">
-          <h2 className="mb-3 text-4xl font-bold text-foreground">
-            Find Your Next Hire
+      <main className="relative container mx-auto px-6 py-16">
+        <div className="mb-16 text-center">
+          <h2 className="mb-4 text-5xl font-bold text-primary tracking-tight animate-fade-in">
+            FIND YOUR NEXT HIRE
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Select a role to browse candidate videos
+          <p className="text-lg text-muted-foreground font-mono">
+            &gt; SELECT_ROLE_TO_BROWSE_CANDIDATES
           </p>
         </div>
 
@@ -86,18 +89,22 @@ const Index = () => {
           {categories.map((category) => (
             <Card
               key={category.id}
-              className="group cursor-pointer overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-xl"
+              className="group relative cursor-pointer overflow-hidden border-2 border-primary/30 bg-card/50 backdrop-blur-sm transition-all hover:scale-105 hover:border-primary hover:shadow-[0_0_30px_hsl(160_100%_45%/0.3)]"
               onClick={() => navigate(`/feed/${category.slug}`)}
             >
-              <div className={`h-32 bg-gradient-to-br ${categoryColors[category.slug] || 'from-gray-500 to-gray-600'} flex items-center justify-center text-6xl transition-transform group-hover:scale-110`}>
-                {categoryIcons[category.slug] || "👤"}
+              <div className={`relative h-40 bg-gradient-to-br ${categoryColors[category.slug] || 'from-primary to-secondary'} flex items-center justify-center text-7xl transition-transform group-hover:scale-110 overflow-hidden`}>
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] group-hover:animate-[shimmer_2s_infinite]" />
+                <span className="relative z-10 drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                  {categoryIcons[category.slug] || "👤"}
+                </span>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-foreground">
-                  {category.name}
+              <div className="relative p-6 border-t border-primary/20">
+                <h3 className="text-xl font-bold text-primary mb-1 tracking-wide">
+                  {category.name.toUpperCase()}
                 </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Browse candidates →
+                <p className="text-sm text-muted-foreground font-mono flex items-center gap-2">
+                  <span className="text-primary">&gt;</span>
+                  Browse candidates
                 </p>
               </div>
             </Card>
