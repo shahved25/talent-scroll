@@ -56,7 +56,6 @@ export type Database = {
           id: string
           name: string
           resume_url: string
-          role: string
           skill_tags: string[] | null
           thumbnail_url: string | null
           updated_at: string
@@ -67,7 +66,6 @@ export type Database = {
           id?: string
           name: string
           resume_url: string
-          role: string
           skill_tags?: string[] | null
           thumbnail_url?: string | null
           updated_at?: string
@@ -78,7 +76,6 @@ export type Database = {
           id?: string
           name?: string
           resume_url?: string
-          role?: string
           skill_tags?: string[] | null
           thumbnail_url?: string | null
           updated_at?: string

@@ -202,7 +202,7 @@ const Shortlist = () => {
           candidate={{
             id: selectedCandidate.id,
             name: selectedCandidate.candidate_name,
-            role: selectedCandidate.candidate_role,
+            category: selectedCandidate.candidate_role,
             videoUrl: selectedCandidate.video_url,
             resumeUrl: selectedCandidate.resume_url,
             thumbnailUrl: selectedCandidate.thumbnail_url,
