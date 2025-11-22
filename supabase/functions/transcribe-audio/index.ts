@@ -12,27 +12,27 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { audioUrl, candidateId } = await req.json();
+    const { videoUrl, candidateId } = await req.json();
     
-    console.log('Transcribing audio for candidate:', candidateId);
+    console.log('Transcribing video for candidate:', candidateId);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Download the audio file
-    const audioResponse = await fetch(audioUrl);
-    if (!audioResponse.ok) {
-      throw new Error('Failed to fetch audio');
+    // Download the video file (Whisper can transcribe directly from video)
+    const videoResponse = await fetch(videoUrl);
+    if (!videoResponse.ok) {
+      throw new Error('Failed to fetch video');
     }
     
-    const audioBlob = await audioResponse.blob();
-    console.log('Audio downloaded, size:', audioBlob.size);
+    const videoBlob = await videoResponse.blob();
+    console.log('Video downloaded, size:', videoBlob.size);
 
-    // Prepare form data for transcription
+    // Prepare form data for transcription (Whisper accepts video files)
     const formData = new FormData();
-    formData.append('file', audioBlob, 'audio.mp3');
+    formData.append('file', videoBlob, 'video.mp4');
     formData.append('model', 'whisper-1');
 
     // Send to Lovable AI for transcription

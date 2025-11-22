@@ -113,14 +113,14 @@ const CandidateSubmission = () => {
           console.error('Error analyzing resume:', error);
         });
 
-        // Start video to audio conversion
-        supabase.functions.invoke('convert-video-to-audio', {
+        // Start video transcription
+        supabase.functions.invoke('transcribe-audio', {
           body: {
             videoUrl,
             candidateId: candidateData.id,
           }
         }).catch(error => {
-          console.error('Error converting video to audio:', error);
+          console.error('Error transcribing video:', error);
         });
       }
 
