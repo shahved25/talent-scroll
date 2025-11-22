@@ -22,9 +22,18 @@ serve(async (req) => {
 
     const resumeBlob = await resumeResponse.blob();
     const resumeBuffer = await resumeBlob.arrayBuffer();
-    const resumeBase64 = btoa(
-      String.fromCharCode(...new Uint8Array(resumeBuffer))
-    );
+    
+    // Convert to base64 in chunks to avoid stack overflow
+    const uint8Array = new Uint8Array(resumeBuffer);
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
+      binary += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    const resumeBase64 = btoa(binary);
+    
+    console.log('Resume size:', resumeBuffer.byteLength, 'bytes');
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
