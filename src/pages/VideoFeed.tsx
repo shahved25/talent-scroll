@@ -15,7 +15,7 @@ interface Candidate {
   thumbnailUrl: string | null;
   skillTags: string[];
   resumeScore: number | null;
-  videoScore?: number | null;
+  videoScore: number | null;
 }
 
 const VideoFeed = () => {
