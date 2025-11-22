@@ -39,24 +39,29 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Cyber grid background */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#0a4b3c10_1px,transparent_1px),linear-gradient(to_bottom,#0a4b3c10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+    <div className="min-h-screen bg-background overflow-hidden">
+      {/* Animated cyber grid background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#0a4b3c10_1px,transparent_1px),linear-gradient(to_bottom,#0a4b3c10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] animate-pulse" />
+      
+      {/* Floating orbs */}
+      <div className="fixed top-20 left-10 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
+      <div className="fixed bottom-20 right-10 w-80 h-80 bg-secondary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+      <div className="fixed top-1/2 left-1/3 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
       
       {/* Header */}
-      <header className="relative border-b border-primary/20 bg-background/50 backdrop-blur-md">
+      <header className="relative border-b border-primary/20 bg-background/50 backdrop-blur-md animate-slide-up">
         <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 animate-slide-in-left">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 border border-primary/50 animate-glow-pulse">
               <Users className="h-5 w-5 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-primary tracking-wider">GlassBox</h1>
+            <h1 className="text-2xl font-bold text-primary tracking-wider hover:scale-105 transition-transform cursor-pointer">GlassBox</h1>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 animate-slide-in-right">
             <Button
               variant="outline"
               onClick={() => navigate("/submit")}
-              className="gap-2 font-mono"
+              className="gap-2 font-mono hover:scale-105 transition-all duration-300"
             >
               <Upload className="h-4 w-4" />
               <span>UPLOAD</span>
@@ -64,7 +69,7 @@ const Index = () => {
             <Button
               variant="outline"
               onClick={() => navigate("/shortlist")}
-              className="gap-2 font-mono"
+              className="gap-2 font-mono hover:scale-105 transition-all duration-300"
             >
               <Heart className="h-4 w-4" />
               <span>SHORTLIST</span>
@@ -76,40 +81,57 @@ const Index = () => {
       {/* Main Content */}
       <main className="relative container mx-auto px-6 py-16">
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-5xl font-bold text-primary tracking-tight animate-fade-in">
+          <h2 className="mb-4 text-5xl font-bold text-primary tracking-tight animate-scale-in">
             FIND YOUR NEXT HIRE
           </h2>
-          <p className="text-lg text-muted-foreground font-mono">
-            &gt; SELECT_ROLE_TO_BROWSE_CANDIDATES
+          <p className="text-lg text-muted-foreground font-mono animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <span className="inline-block">&gt;</span> SELECT_ROLE_TO_BROWSE_CANDIDATES
           </p>
         </div>
 
-        {/* Category Grid */}
+        {/* Category Grid with staggered animations */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <Card
               key={category.id}
-              className="group relative cursor-pointer overflow-hidden border-2 border-primary/30 bg-card/50 backdrop-blur-sm transition-all hover:scale-105 hover:border-primary hover:shadow-[0_0_30px_hsl(160_100%_45%/0.3)]"
+              className="group relative cursor-pointer overflow-hidden border-2 border-primary/30 bg-card/50 backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:border-primary hover:shadow-[0_0_30px_hsl(160_100%_45%/0.3)] animate-bounce-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
               onClick={() => navigate(`/feed/${category.slug}`)}
             >
-              <div className={`relative h-40 bg-gradient-to-br ${categoryColors[category.slug] || 'from-primary to-secondary'} flex items-center justify-center text-7xl transition-transform group-hover:scale-110 overflow-hidden`}>
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] group-hover:animate-[shimmer_2s_infinite]" />
-                <span className="relative z-10 drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+              {/* Hover overlay effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/10 group-hover:to-secondary/10 transition-all duration-500 pointer-events-none" />
+              
+              <div className={`relative h-40 bg-gradient-to-br ${categoryColors[category.slug] || 'from-primary to-secondary'} flex items-center justify-center text-7xl transition-all duration-500 group-hover:scale-110 overflow-hidden`}>
+                {/* Animated shimmer overlay */}
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.1)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-shimmer" />
+                
+                {/* Pulse rings on hover */}
+                <div className="absolute inset-0 rounded-full border-4 border-primary/30 group-hover:animate-ping-slow opacity-0 group-hover:opacity-100" />
+                
+                <span className="relative z-10 drop-shadow-[0_0_10px_rgba(0,0,0,0.5)] group-hover:animate-float">
                   {categoryIcons[category.slug] || "👤"}
                 </span>
               </div>
-              <div className="relative p-6 border-t border-primary/20">
-                <h3 className="text-xl font-bold text-primary mb-1 tracking-wide">
+              <div className="relative p-6 border-t border-primary/20 bg-gradient-to-b from-transparent to-background/20">
+                <h3 className="text-xl font-bold text-primary mb-1 tracking-wide group-hover:text-secondary transition-colors duration-300">
                   {category.name.toUpperCase()}
                 </h3>
                 <p className="text-sm text-muted-foreground font-mono flex items-center gap-2">
-                  <span className="text-primary">&gt;</span>
-                  Browse candidates
+                  <span className="text-primary group-hover:animate-pulse">&gt;</span>
+                  <span className="group-hover:translate-x-2 transition-transform duration-300">Browse candidates</span>
                 </p>
               </div>
+              
+              {/* Corner accent */}
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </Card>
           ))}
         </div>
+
+        {/* Floating particles */}
+        <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-primary rounded-full animate-ping-slow" style={{ animationDelay: '0s' }} />
+        <div className="absolute bottom-1/3 left-1/4 w-3 h-3 bg-secondary rounded-full animate-ping-slow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 right-1/3 w-2 h-2 bg-accent rounded-full animate-ping-slow" style={{ animationDelay: '2s' }} />
       </main>
     </div>
   );

@@ -135,7 +135,7 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
 
   return (
     <div
-      className="relative h-screen w-full snap-start snap-always overflow-hidden bg-black cursor-pointer flex items-center justify-center"
+      className="relative h-screen w-full snap-start snap-always overflow-hidden bg-black cursor-pointer flex items-center justify-center group"
       onTouchStart={handleTouchStart}
       onTouchEnd={(e) => {
         handleTouchEnd(e);
@@ -149,24 +149,36 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
         isDragging.current = false;
       }}
     >
+      {/* Animated particles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/30 rounded-full animate-ping-slow" />
+        <div className="absolute bottom-1/3 right-1/3 w-3 h-3 bg-secondary/30 rounded-full animate-ping-slow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-2/3 right-1/4 w-2 h-2 bg-accent/30 rounded-full animate-ping-slow" style={{ animationDelay: '2s' }} />
+      </div>
+      
       <div className="w-full max-w-[56.25vh] px-4">
         <AspectRatio ratio={9 / 16}>
           {/* Video */}
           <video
             ref={videoRef}
             src={candidate.videoUrl}
-            className="absolute inset-0 h-full w-full object-cover rounded-xl"
+            className="absolute inset-0 h-full w-full object-cover rounded-xl group-hover:scale-[1.02] transition-transform duration-500"
             loop
             playsInline
           />
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70 rounded-xl" />
+          {/* Gradient Overlay with animation */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70 rounded-xl animate-fade-in" />
 
           {/* Heart Animation */}
           {showHeartAnimation && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <Heart className="h-32 w-32 fill-heart text-heart animate-heart-pop drop-shadow-2xl" />
+              <div className="relative">
+                <Heart className="h-32 w-32 fill-heart text-heart animate-heart-pop drop-shadow-2xl" />
+                <div className="absolute inset-0 h-32 w-32">
+                  <div className="absolute inset-0 rounded-full border-4 border-heart animate-ping-slow" />
+                </div>
+              </div>
             </div>
           )}
 
@@ -212,9 +224,10 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
           {/* Resume Button (visible on desktop) */}
           <button
             onClick={onSwipeRight}
-            className="absolute bottom-24 right-6 hidden md:flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-110"
+            className="absolute bottom-24 right-6 hidden md:flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_hsl(160_100%_45%/0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_hsl(160_100%_45%/0.7)] animate-float group"
           >
-            <FileText className="h-6 w-6" />
+            <FileText className="h-6 w-6 group-hover:animate-pulse" />
+            <div className="absolute inset-0 rounded-full border-2 border-primary/50 animate-ping-slow" />
           </button>
         </AspectRatio>
       </div>
