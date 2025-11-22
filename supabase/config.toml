@@ -1,1 +1,13 @@
 project_id = "dwdhjybrstwivfsazlkx"
+
+[functions.transcribe-audio]
+verify_jwt = false
+
+[functions.analyze-resume]
+verify_jwt = false
+
+[functions.analyze-video]
+verify_jwt = false
+
+[functions.calculate-final-score]
+verify_jwt = false

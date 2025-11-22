@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     
     const resumeBase64 = btoa(binaryString);
 
-    // Call Lovable AI API
+    // Call Groq AI with vision support via Lovable AI Gateway for PDF analysis
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
     if (!lovableApiKey) {
       throw new Error('LOVABLE_API_KEY not configured');

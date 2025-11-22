@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import ResumeScore from "@/components/ResumeScore";
+import CandidateInsights from "@/components/CandidateInsights";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -19,6 +19,7 @@ interface Candidate {
   thumbnailUrl: string | null;
   skillTags: string[];
   resumeScore: number | null;
+  videoScore?: number | null;
 }
 
 interface ResumePanelProps {
@@ -144,8 +145,12 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
             <h2 className="text-xl font-bold text-primary tracking-wide">
               {candidate.name.toUpperCase()}
             </h2>
-            <p className="text-sm text-muted-foreground font-mono mb-2">&gt; {candidate.category}</p>
-            <ResumeScore score={candidate.resumeScore} variant="detailed" />
+            <p className="text-sm text-muted-foreground font-mono mb-3">&gt; {candidate.category}</p>
+            <CandidateInsights 
+              resumeScore={candidate.resumeScore} 
+              videoScore={candidate.videoScore || null}
+              className="max-w-2xl mx-auto"
+            />
           </div>
 
           <Button 
