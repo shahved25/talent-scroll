@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Candidate } from "@/data/mockData";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface VideoPlayerProps {
   candidate: Candidate;
@@ -120,7 +121,7 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
 
   return (
     <div
-      className="relative h-screen w-full snap-start snap-always overflow-hidden bg-black cursor-pointer"
+      className="relative h-screen w-full snap-start snap-always overflow-hidden bg-black cursor-pointer flex items-center justify-center"
       onTouchStart={handleTouchStart}
       onTouchEnd={(e) => {
         handleTouchEnd(e);
@@ -134,72 +135,76 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
         isDragging.current = false;
       }}
     >
-      {/* Video */}
-      <video
-        ref={videoRef}
-        src={candidate.videoUrl}
-        className="h-full w-full object-cover"
-        loop
-        playsInline
-        muted
-      />
+      <div className="w-full max-w-[56.25vh] px-4">
+        <AspectRatio ratio={9 / 16}>
+          {/* Video */}
+          <video
+            ref={videoRef}
+            src={candidate.videoUrl}
+            className="absolute inset-0 h-full w-full object-cover rounded-xl"
+            loop
+            playsInline
+            muted
+          />
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70 rounded-xl" />
 
-      {/* Heart Animation */}
-      {showHeartAnimation && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <Heart className="h-32 w-32 fill-heart text-heart animate-heart-pop drop-shadow-2xl" />
-        </div>
-      )}
+          {/* Heart Animation */}
+          {showHeartAnimation && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <Heart className="h-32 w-32 fill-heart text-heart animate-heart-pop drop-shadow-2xl" />
+            </div>
+          )}
 
-      {/* Candidate Info */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-        <h2 className="mb-2 text-3xl font-bold drop-shadow-lg">{candidate.name}</h2>
-        <p className="mb-4 text-lg text-white/90 drop-shadow-md">{candidate.role}</p>
-        
-        {/* Skill Tags */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          {candidate.skillTags.map((tag) => (
-            <Badge
-              key={tag}
-              variant="secondary"
-              className="bg-white/20 text-white backdrop-blur-sm border-white/30"
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
+          {/* Candidate Info */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+            <h2 className="mb-2 text-3xl font-bold drop-shadow-lg">{candidate.name}</h2>
+            <p className="mb-4 text-lg text-white/90 drop-shadow-md">{candidate.role}</p>
+            
+            {/* Skill Tags */}
+            <div className="mb-6 flex flex-wrap gap-2">
+              {candidate.skillTags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="bg-white/20 text-white backdrop-blur-sm border-white/30"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
 
-        {/* Instructions */}
-        <div className="flex items-center justify-between text-sm text-white/80">
-          <div className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            <span>Double tap to shortlist</span>
+            {/* Instructions */}
+            <div className="flex items-center justify-between text-sm text-white/80">
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4" />
+                <span>Double tap to shortlist</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                <span>Swipe right for resume</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            <span>Swipe right for resume</span>
-          </div>
-        </div>
+
+          {/* Shortlist Indicator */}
+          {isShortlisted && (
+            <div className="absolute top-6 right-6 flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-white shadow-lg">
+              <Heart className="h-5 w-5 fill-current" />
+              <span className="font-medium">Shortlisted</span>
+            </div>
+          )}
+
+          {/* Resume Button (visible on desktop) */}
+          <button
+            onClick={onSwipeRight}
+            className="absolute bottom-24 right-6 hidden md:flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-110"
+          >
+            <FileText className="h-6 w-6" />
+          </button>
+        </AspectRatio>
       </div>
-
-      {/* Shortlist Indicator */}
-      {isShortlisted && (
-        <div className="absolute top-6 right-6 flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-white shadow-lg">
-          <Heart className="h-5 w-5 fill-current" />
-          <span className="font-medium">Shortlisted</span>
-        </div>
-      )}
-
-      {/* Resume Button (visible on desktop) */}
-      <button
-        onClick={onSwipeRight}
-        className="absolute bottom-24 right-6 hidden md:flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-110"
-      >
-        <FileText className="h-6 w-6" />
-      </button>
     </div>
   );
 };
