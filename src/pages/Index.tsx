@@ -2,18 +2,39 @@ import { useNavigate } from "react-router-dom";
 import { Heart, Users, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const categories = [
-  { id: "ui-designer", name: "UI Designer", icon: "🎨", color: "from-purple-500 to-pink-500" },
-  { id: "backend-engineer", name: "Backend Engineer", icon: "⚙️", color: "from-blue-500 to-cyan-500" },
-  { id: "frontend-developer", name: "Frontend Developer", icon: "💻", color: "from-green-500 to-teal-500" },
-  { id: "product-manager", name: "Product Manager", icon: "📊", color: "from-orange-500 to-red-500" },
-  { id: "data-scientist", name: "Data Scientist", icon: "📈", color: "from-indigo-500 to-purple-500" },
-  { id: "devops-engineer", name: "DevOps Engineer", icon: "🔧", color: "from-yellow-500 to-orange-500" },
+const defaultIcons = ["🎨", "⚙️", "💻", "📊", "📈", "🔧"];
+const defaultColors = [
+  "from-purple-500 to-pink-500",
+  "from-blue-500 to-cyan-500",
+  "from-green-500 to-teal-500",
+  "from-orange-500 to-red-500",
+  "from-indigo-500 to-purple-500",
+  "from-yellow-500 to-orange-500",
 ];
 
 const Index = () => {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string; icon: string; color: string }>>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase.from("categories").select("*");
+      if (data) {
+        const formattedCategories = data.map((cat, index) => ({
+          id: cat.id,
+          name: cat.name,
+          slug: cat.slug,
+          icon: defaultIcons[index % defaultIcons.length],
+          color: defaultColors[index % defaultColors.length],
+        }));
+        setCategories(formattedCategories);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
@@ -64,7 +85,7 @@ const Index = () => {
             <Card
               key={category.id}
               className="group cursor-pointer overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-xl"
-              onClick={() => navigate(`/feed/${category.id}`)}
+              onClick={() => navigate(`/feed/${category.slug}`)}
             >
               <div className={`h-32 bg-gradient-to-br ${category.color} flex items-center justify-center text-6xl transition-transform group-hover:scale-110`}>
                 {category.icon}
