@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import VideoFeed from "./pages/VideoFeed";
 import Shortlist from "./pages/Shortlist";
+import CandidateSubmission from "./pages/CandidateSubmission";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/feed/:category" element={<VideoFeed />} />
             <Route path="/shortlist" element={<Shortlist />} />
+            <Route path="/submit" element={<CandidateSubmission />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
