@@ -52,6 +52,7 @@ export type Database = {
       }
       candidates: {
         Row: {
+          audio_url: string | null
           category_id: string | null
           created_at: string
           id: string
@@ -65,6 +66,7 @@ export type Database = {
           video_url: string
         }
         Insert: {
+          audio_url?: string | null
           category_id?: string | null
           created_at?: string
           id?: string
@@ -78,6 +80,7 @@ export type Database = {
           video_url: string
         }
         Update: {
+          audio_url?: string | null
           category_id?: string | null
           created_at?: string
           id?: string
