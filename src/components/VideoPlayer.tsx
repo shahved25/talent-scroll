@@ -3,8 +3,17 @@ import { Heart, FileText, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Candidate } from "@/data/mockData";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+
+interface Candidate {
+  id: string;
+  name: string;
+  role: string;
+  videoUrl: string;
+  resumeUrl: string;
+  thumbnailUrl: string | null;
+  skillTags: string[];
+}
 
 interface VideoPlayerProps {
   candidate: Candidate;

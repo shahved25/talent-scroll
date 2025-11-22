@@ -4,8 +4,17 @@ import { ArrowLeft, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
 import ResumePanel from "@/components/ResumePanel";
-import { getCandidatesByCategory } from "@/data/mockData";
-import type { Candidate } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Candidate {
+  id: string;
+  name: string;
+  role: string;
+  videoUrl: string;
+  resumeUrl: string;
+  thumbnailUrl: string | null;
+  skillTags: string[];
+}
 
 const VideoFeed = () => {
   const { category } = useParams<{ category: string }>();
@@ -16,10 +25,49 @@ const VideoFeed = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (category) {
-      const categoryCandidates = getCandidatesByCategory(category);
-      setCandidates(categoryCandidates);
-    }
+    const fetchCandidates = async () => {
+      if (!category) return;
+
+      const { data: categoryData } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('slug', category)
+        .single();
+
+      if (!categoryData) return;
+
+      const { data } = await supabase
+        .from('candidate_categories')
+        .select(`
+          candidates (
+            id,
+            name,
+            role,
+            video_url,
+            resume_url,
+            thumbnail_url,
+            skill_tags
+          )
+        `)
+        .eq('category_id', categoryData.id);
+
+      if (data) {
+        const formattedCandidates = data
+          .filter(item => item.candidates)
+          .map((item: any) => ({
+            id: item.candidates.id,
+            name: item.candidates.name,
+            role: item.candidates.role,
+            videoUrl: item.candidates.video_url,
+            resumeUrl: item.candidates.resume_url,
+            thumbnailUrl: item.candidates.thumbnail_url,
+            skillTags: item.candidates.skill_tags || [],
+          }));
+        setCandidates(formattedCandidates);
+      }
+    };
+
+    fetchCandidates();
   }, [category]);
 
   const handleScroll = () => {
