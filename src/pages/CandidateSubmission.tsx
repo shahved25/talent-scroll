@@ -109,51 +109,64 @@ const CandidateSubmission = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Cyber grid background */}
+    <div className="min-h-screen bg-background overflow-hidden">
+      {/* Animated cyber grid background */}
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#0a4b3c10_1px,transparent_1px),linear-gradient(to_bottom,#0a4b3c10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+      
+      {/* Floating orbs */}
+      <div className="fixed top-1/4 right-1/4 w-72 h-72 bg-secondary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '0.5s' }} />
+      <div className="fixed bottom-1/4 left-1/4 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
       
       <div className="relative container mx-auto px-4 py-8 max-w-2xl">
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
-          className="mb-6 hover:bg-primary/10"
+          className="mb-6 hover:bg-primary/10 hover:scale-105 transition-all duration-300 animate-slide-in-left"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           <span className="font-mono">BACK</span>
         </Button>
 
-        <div className="bg-card/50 backdrop-blur-sm border-2 border-primary/30 rounded-lg p-8 hover:border-primary/50 transition-all">
-          <h1 className="text-3xl font-bold text-primary mb-2 tracking-wide">SUBMIT_PROFILE</h1>
-          <p className="text-muted-foreground mb-8 font-mono">
+        <div className="bg-card/50 backdrop-blur-sm border-2 border-primary/30 rounded-lg p-8 hover:border-primary/50 transition-all duration-500 relative overflow-hidden animate-scale-in">
+          {/* Animated corner accents */}
+          <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-primary/40 animate-pulse" />
+          <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-primary/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
+          
+          <h1 className="text-3xl font-bold text-primary mb-2 tracking-wide animate-slide-up-fade">SUBMIT_PROFILE</h1>
+          <p className="text-muted-foreground mb-8 font-mono animate-fade-in" style={{ animationDelay: '0.2s' }}>
             &gt; Upload_credentials_for_discovery
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.3s' }}>
+              <Label htmlFor="name" className="text-primary font-mono">Full Name</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 placeholder="John Doe"
+                className="border-primary/30 focus:border-primary transition-all duration-300"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.4s' }}>
+              <Label htmlFor="category" className="text-primary font-mono">Category</Label>
               <Select
                 value={formData.categoryId}
                 onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
                 required
               >
-                <SelectTrigger id="category">
+                <SelectTrigger id="category" className="border-primary/30 focus:border-primary transition-all duration-300">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card/95 backdrop-blur-sm border-primary/30 z-50">
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem 
+                      key={category.id} 
+                      value={category.id}
+                      className="hover:bg-primary/10 focus:bg-primary/20 cursor-pointer transition-all duration-200"
+                    >
                       {category.name}
                     </SelectItem>
                   ))}
@@ -161,64 +174,78 @@ const CandidateSubmission = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="skills">Skills (comma-separated)</Label>
+            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.5s' }}>
+              <Label htmlFor="skills" className="text-primary font-mono">Skills (comma-separated)</Label>
               <Textarea
                 id="skills"
                 value={formData.skills}
                 onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
                 placeholder="Figma, Adobe XD, UI Design, Prototyping"
                 rows={3}
+                className="border-primary/30 focus:border-primary transition-all duration-300"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="resume">Resume (PDF)</Label>
-              <div className="relative">
+            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.6s' }}>
+              <Label htmlFor="resume" className="text-primary font-mono">Resume (PDF)</Label>
+              <div className="relative group">
                 <Input
                   id="resume"
                   type="file"
                   accept=".pdf"
                   onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
                   required
-                  className="cursor-pointer"
+                  className="cursor-pointer border-primary/30 focus:border-primary transition-all duration-300 group-hover:border-primary/50"
                 />
-                <FileText className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <FileText className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none group-hover:text-primary transition-colors duration-300" />
               </div>
               {resumeFile && (
-                <p className="text-sm text-muted-foreground">{resumeFile.name}</p>
+                <p className="text-sm text-primary font-mono animate-fade-in flex items-center gap-2">
+                  <span className="animate-pulse">✓</span> {resumeFile.name}
+                </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="video">Introduction Video (MP4, MOV)</Label>
-              <div className="relative">
+            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.7s' }}>
+              <Label htmlFor="video" className="text-primary font-mono">Introduction Video (MP4, MOV)</Label>
+              <div className="relative group">
                 <Input
                   id="video"
                   type="file"
                   accept="video/*"
                   onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
                   required
-                  className="cursor-pointer"
+                  className="cursor-pointer border-primary/30 focus:border-primary transition-all duration-300 group-hover:border-primary/50"
                 />
-                <Video className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Video className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none group-hover:text-primary transition-colors duration-300" />
               </div>
               {videoFile && (
-                <p className="text-sm text-muted-foreground">{videoFile.name}</p>
+                <p className="text-sm text-primary font-mono animate-fade-in flex items-center gap-2">
+                  <span className="animate-pulse">✓</span> {videoFile.name}
+                </p>
               )}
             </div>
 
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full font-mono tracking-wide"
+              className="w-full font-mono tracking-wide relative overflow-hidden group animate-bounce-in"
               size="lg"
+              style={{ animationDelay: '0.8s' }}
             >
+              {/* Button glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_100%] animate-gradient-x opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
+              
               {isSubmitting ? (
-                <>UPLOADING...</>
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                    UPLOADING...
+                  </div>
+                </>
               ) : (
                 <>
-                  <Upload className="mr-2 h-4 w-4" />
+                  <Upload className="mr-2 h-4 w-4 group-hover:animate-bounce" />
                   SUBMIT_PROFILE
                 </>
               )}

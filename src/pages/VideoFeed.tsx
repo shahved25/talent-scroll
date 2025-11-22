@@ -81,12 +81,24 @@ const VideoFeed = () => {
 
   if (candidates.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-xl text-muted-foreground">No candidates found</p>
-          <Button onClick={() => navigate("/")} className="mt-4">
+      <div className="flex min-h-screen items-center justify-center bg-background overflow-hidden">
+        {/* Animated background */}
+        <div className="fixed inset-0 bg-[linear-gradient(to_right,#0a4b3c10_1px,transparent_1px),linear-gradient(to_bottom,#0a4b3c10_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+        <div className="fixed top-1/3 right-1/3 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-float" />
+        
+        <div className="relative text-center animate-bounce-in">
+          <div className="mb-8 relative">
+            <div className="text-8xl animate-float">🎥</div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-40 h-40 border-2 border-primary/30 rounded-full animate-ping-slow" />
+            </div>
+          </div>
+          <p className="text-xl text-muted-foreground font-mono mb-6 animate-slide-up-fade">
+            &gt; NO_CANDIDATES_FOUND
+          </p>
+          <Button onClick={() => navigate("/")} className="animate-scale-in" style={{ animationDelay: '0.3s' }}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Categories
+            BACK_TO_CATEGORIES
           </Button>
         </div>
       </div>
@@ -95,13 +107,19 @@ const VideoFeed = () => {
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-black">
+      {/* Animated background particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/3 right-1/4 w-40 h-40 bg-secondary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+      </div>
+      
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-gradient-to-b from-black/50 to-transparent">
+      <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-gradient-to-b from-black/70 via-black/40 to-transparent backdrop-blur-sm animate-slide-up">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => navigate("/")}
-          className="text-white hover:bg-white/20"
+          className="text-white hover:bg-white/20 hover:scale-110 transition-all duration-300 animate-scale-in"
         >
           <ArrowLeft className="h-6 w-6" />
         </Button>
@@ -109,9 +127,11 @@ const VideoFeed = () => {
           variant="ghost"
           size="icon"
           onClick={() => navigate("/shortlist")}
-          className="text-white hover:bg-white/20"
+          className="text-white hover:bg-white/20 hover:scale-110 transition-all duration-300 animate-scale-in relative"
+          style={{ animationDelay: '0.1s' }}
         >
           <Heart className="h-6 w-6" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-ping-slow" />
         </Button>
       </header>
 
