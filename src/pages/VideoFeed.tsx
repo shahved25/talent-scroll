@@ -16,6 +16,7 @@ interface Candidate {
   skillTags: string[];
   resumeScore: number | null;
   videoScore: number | null;
+  englishProficiency: number | null;
 }
 
 const VideoFeed = () => {
@@ -40,7 +41,7 @@ const VideoFeed = () => {
 
       const { data } = await supabase
         .from('candidates')
-        .select('id, name, video_url, resume_url, thumbnail_url, skill_tags, resume_score, video_score')
+        .select('id, name, video_url, resume_url, thumbnail_url, skill_tags, resume_score, video_score, english_proficiency')
         .eq('category_id', categoryData.id);
 
       if (data) {
@@ -54,6 +55,7 @@ const VideoFeed = () => {
           skillTags: candidate.skill_tags || [],
           resumeScore: candidate.resume_score,
           videoScore: candidate.video_score,
+          englishProficiency: candidate.english_proficiency,
         }));
         setCandidates(formattedCandidates);
       }

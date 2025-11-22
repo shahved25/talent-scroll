@@ -55,6 +55,7 @@ export type Database = {
           audio_url: string | null
           category_id: string | null
           created_at: string
+          english_proficiency: number | null
           id: string
           name: string
           resume_score: number | null
@@ -70,6 +71,7 @@ export type Database = {
           audio_url?: string | null
           category_id?: string | null
           created_at?: string
+          english_proficiency?: number | null
           id?: string
           name: string
           resume_score?: number | null
@@ -85,6 +87,7 @@ export type Database = {
           audio_url?: string | null
           category_id?: string | null
           created_at?: string
+          english_proficiency?: number | null
           id?: string
           name?: string
           resume_score?: number | null
