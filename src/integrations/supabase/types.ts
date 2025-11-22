@@ -58,6 +58,7 @@ export type Database = {
           english_proficiency: number | null
           id: string
           name: string
+          portfolio_url: string | null
           resume_score: number | null
           resume_url: string
           skill_tags: string[] | null
@@ -74,6 +75,7 @@ export type Database = {
           english_proficiency?: number | null
           id?: string
           name: string
+          portfolio_url?: string | null
           resume_score?: number | null
           resume_url: string
           skill_tags?: string[] | null
@@ -90,6 +92,7 @@ export type Database = {
           english_proficiency?: number | null
           id?: string
           name?: string
+          portfolio_url?: string | null
           resume_score?: number | null
           resume_url?: string
           skill_tags?: string[] | null

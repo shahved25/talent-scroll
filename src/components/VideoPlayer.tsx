@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Heart, FileText, X } from "lucide-react";
+import { Heart, FileText, Briefcase } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ interface Candidate {
   category: string;
   videoUrl: string;
   resumeUrl: string;
+  portfolioUrl: string | null;
   thumbnailUrl: string | null;
   skillTags: string[];
   resumeScore: number | null;
@@ -25,9 +26,10 @@ interface VideoPlayerProps {
   candidate: Candidate;
   isActive: boolean;
   onSwipeRight: () => void;
+  onPortfolioClick: () => void;
 }
 
-const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) => {
+const VideoPlayer = ({ candidate, isActive, onSwipeRight, onPortfolioClick }: VideoPlayerProps) => {
   const [isShortlisted, setIsShortlisted] = useState(false);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -254,14 +256,28 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
             </div>
           )}
 
-          {/* Resume Button (visible on desktop) */}
-          <button
-            onClick={onSwipeRight}
-            className="absolute bottom-24 right-6 hidden md:flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_hsl(160_100%_45%/0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_hsl(160_100%_45%/0.7)] group"
-          >
-            <FileText className="h-6 w-6 group-hover:animate-pulse" />
-            <div className="absolute inset-0 rounded-full border-2 border-primary/50 animate-ping-slow" />
-          </button>
+          {/* Action Buttons (visible on desktop) */}
+          <div className="absolute bottom-24 right-6 hidden md:flex flex-col gap-4">
+            {/* Portfolio Button */}
+            {candidate.portfolioUrl && (
+              <button
+                onClick={onPortfolioClick}
+                className="h-14 w-14 flex items-center justify-center rounded-full bg-secondary text-secondary-foreground shadow-[0_0_30px_hsl(var(--secondary)/0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_hsl(var(--secondary)/0.7)] group relative"
+              >
+                <Briefcase className="h-6 w-6 group-hover:animate-pulse" />
+                <div className="absolute inset-0 rounded-full border-2 border-secondary/50 animate-ping-slow" />
+              </button>
+            )}
+            
+            {/* Resume Button */}
+            <button
+              onClick={onSwipeRight}
+              className="h-14 w-14 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_hsl(160_100%_45%/0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_hsl(160_100%_45%/0.7)] group relative"
+            >
+              <FileText className="h-6 w-6 group-hover:animate-pulse" />
+              <div className="absolute inset-0 rounded-full border-2 border-primary/50 animate-ping-slow" />
+            </button>
+          </div>
         </AspectRatio>
       </div>
     </div>
