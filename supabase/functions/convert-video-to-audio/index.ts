@@ -109,6 +109,22 @@ Deno.serve(async (req) => {
 
     console.log('Conversion complete for candidate:', candidateId);
 
+    // Trigger audio transcription (fire and forget)
+    try {
+      const transcribeResponse = await supabase.functions.invoke('transcribe-audio', {
+        body: { audioUrl, candidateId }
+      });
+      
+      if (transcribeResponse.error) {
+        console.error('Transcription trigger error:', transcribeResponse.error);
+      } else {
+        console.log('Transcription triggered successfully');
+      }
+    } catch (transcribeError) {
+      console.error('Failed to trigger transcription:', transcribeError);
+      // Don't fail the conversion if transcription fails
+    }
+
     return new Response(
       JSON.stringify({ success: true, audioUrl }),
       { 
