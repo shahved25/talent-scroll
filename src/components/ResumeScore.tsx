@@ -29,7 +29,7 @@ const ResumeScore = ({ score, variant = "compact", className = "" }: ResumeScore
         <Badge 
           className={`${getScoreColor(score)} backdrop-blur-sm font-mono text-xs px-3 py-1 animate-fade-in`}
         >
-          RESUME SCORE: {score}/100
+          SCORE: {score}/100
         </Badge>
       </div>
     );
