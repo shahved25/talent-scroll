@@ -41,6 +41,30 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
     }
   }, [isActive]);
 
+  // Keyboard shortcuts (only active for current video)
+  useEffect(() => {
+    if (!isActive) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        if (videoRef.current) {
+          if (videoRef.current.paused) {
+            videoRef.current.play().catch(console.error);
+          } else {
+            videoRef.current.pause();
+          }
+        }
+      } else if (e.key === "l" || e.key === "L") {
+        e.preventDefault();
+        handleShortlist();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isActive]);
+
   const handleDoubleTap = async (e: React.TouchEvent) => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTapTime.current;
