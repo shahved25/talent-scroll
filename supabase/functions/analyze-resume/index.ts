@@ -1,11 +1,18 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+interface ResumeAnalysis {
+  score: number;
+  strengths: string[];
+  improvements: string[];
+  summary: string;
+}
+
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -15,35 +22,37 @@ serve(async (req) => {
     
     console.log('Analyzing resume for:', candidateName, 'Category:', category);
 
+    // Fetch the resume PDF
     const resumeResponse = await fetch(resumeUrl);
     if (!resumeResponse.ok) {
       throw new Error('Failed to fetch resume');
     }
-
+    
     const resumeBlob = await resumeResponse.blob();
     const resumeBuffer = await resumeBlob.arrayBuffer();
     
     // Convert to base64 in chunks to avoid stack overflow
     const uint8Array = new Uint8Array(resumeBuffer);
-    let binary = '';
+    let binaryString = '';
     const chunkSize = 8192;
+    
     for (let i = 0; i < uint8Array.length; i += chunkSize) {
       const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
-      binary += String.fromCharCode.apply(null, Array.from(chunk));
+      binaryString += String.fromCharCode.apply(null, Array.from(chunk));
     }
-    const resumeBase64 = btoa(binary);
     
-    console.log('Resume size:', resumeBuffer.byteLength, 'bytes');
+    const resumeBase64 = btoa(binaryString);
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
+    // Call Lovable AI API
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -54,7 +63,28 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `Analyze this resume for ${candidateName} applying for a ${category} position. Evaluate their qualifications and provide a score from 1-100.`
+                text: `You are an expert technical recruiter analyzing a resume for a ${category} position.
+
+Analyze this resume and provide:
+
+1. An overall score (0-100) based on:
+   - Technical skills relevance (30%)
+   - Experience quality and relevance (30%)
+   - Education and certifications (15%)
+   - Projects and achievements (15%)
+   - Resume presentation and clarity (10%)
+
+2. Top 3-4 strengths (brief bullet points)
+3. Top 3-4 areas for improvement (brief bullet points)
+4. A concise 2-3 sentence summary
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "score": 85,
+  "strengths": ["Strong technical skills", "Relevant experience"],
+  "improvements": ["Add more metrics", "Include certifications"],
+  "summary": "Strong candidate with relevant experience."
+}`
               },
               {
                 type: 'image_url',
@@ -65,53 +95,31 @@ serve(async (req) => {
             ]
           }
         ],
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'analyze_resume',
-              description: 'Analyze a resume and provide structured feedback',
-              parameters: {
-                type: 'object',
-                properties: {
-                  score: {
-                    type: 'number',
-                    description: 'Score from 1-100 based on qualifications, experience, and fit for the role'
-                  },
-                  strengths: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: '2-3 key strengths from the resume'
-                  },
-                  improvements: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: '1-2 areas for improvement'
-                  },
-                  summary: {
-                    type: 'string',
-                    description: 'Brief 1-2 sentence summary of the candidate'
-                  }
-                },
-                required: ['score', 'strengths', 'improvements', 'summary']
-              }
-            }
-          }
-        ],
-        tool_choice: { type: 'function', function: { name: 'analyze_resume' } }
+        max_tokens: 1000
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI error:', errorText);
+      console.error('Lovable AI error:', errorText);
       throw new Error(`AI API error: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    const toolCall = aiData.choices[0].message.tool_calls[0];
-    const analysis = JSON.parse(toolCall.function.arguments);
-
+    const content = aiData.choices[0].message.content;
+    
+    // Strip markdown code blocks if present
+    let jsonContent = content.trim();
+    if (jsonContent.startsWith('```')) {
+      // Remove opening ```json or ```
+      jsonContent = jsonContent.replace(/^```(?:json)?\n?/, '');
+      // Remove closing ```
+      jsonContent = jsonContent.replace(/\n?```$/, '');
+    }
+    
+    // Parse the JSON response
+    const analysis: ResumeAnalysis = JSON.parse(jsonContent.trim());
+    
     console.log('Analysis complete:', analysis.score);
 
     return new Response(
@@ -124,9 +132,10 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error analyzing resume:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
         score: 0,
         strengths: [],
         improvements: [],

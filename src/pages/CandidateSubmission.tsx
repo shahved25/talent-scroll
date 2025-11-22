@@ -92,12 +92,11 @@ const CandidateSubmission = () => {
 
       if (insertError) throw insertError;
 
-      // Analyze resume and video with Lovable AI and update scores
+      // Analyze resume with Lovable AI and update score
       const selectedCategory = categories.find(c => c.id === formData.categoryId);
       if (candidateData && selectedCategory) {
-        // Analyze resume
         try {
-          const { data: resumeAnalysisData, error: resumeAnalysisError } = await supabase.functions.invoke('analyze-resume', {
+          const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-resume', {
             body: {
               resumeUrl,
               candidateName: formData.name,
@@ -105,34 +104,16 @@ const CandidateSubmission = () => {
             }
           });
 
-          if (!resumeAnalysisError && resumeAnalysisData?.score) {
+          if (!analysisError && analysisData?.score) {
+            // Update candidate with resume score
             await supabase
               .from('candidates')
-              .update({ resume_score: resumeAnalysisData.score })
+              .update({ resume_score: analysisData.score })
               .eq('id', candidateData.id);
           }
         } catch (error) {
           console.error('Error analyzing resume:', error);
-        }
-
-        // Analyze video
-        try {
-          const { data: videoAnalysisData, error: videoAnalysisError } = await supabase.functions.invoke('analyze-video', {
-            body: {
-              videoUrl,
-              candidateName: formData.name,
-              category: selectedCategory.name,
-            }
-          });
-
-          if (!videoAnalysisError && videoAnalysisData?.score) {
-            await supabase
-              .from('candidates')
-              .update({ video_score: videoAnalysisData.score })
-              .eq('id', candidateData.id);
-          }
-        } catch (error) {
-          console.error('Error analyzing video:', error);
+          // Continue even if analysis fails
         }
       }
 

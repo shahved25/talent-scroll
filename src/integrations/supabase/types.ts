@@ -61,7 +61,6 @@ export type Database = {
           skill_tags: string[] | null
           thumbnail_url: string | null
           updated_at: string
-          video_score: number | null
           video_url: string
         }
         Insert: {
@@ -74,7 +73,6 @@ export type Database = {
           skill_tags?: string[] | null
           thumbnail_url?: string | null
           updated_at?: string
-          video_score?: number | null
           video_url: string
         }
         Update: {
@@ -87,7 +85,6 @@ export type Database = {
           skill_tags?: string[] | null
           thumbnail_url?: string | null
           updated_at?: string
-          video_score?: number | null
           video_url?: string
         }
         Relationships: [
