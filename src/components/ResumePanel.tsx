@@ -1,8 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, X, ChevronLeft } from "lucide-react";
+import { Heart, X, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface Candidate {
   id: string;
@@ -24,6 +29,8 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1);
 
   useEffect(() => {
     if (isOpen) {
@@ -90,6 +97,11 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
     }
   };
 
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setPageNumber(1);
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -136,12 +148,37 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
         </div>
 
         {/* PDF Viewer */}
-        <div className="h-[calc(100vh-73px)] w-full overflow-hidden bg-muted/30">
-          <iframe
-            src={candidate.resumeUrl}
-            className="h-full w-full"
-            title={`${candidate.name}'s Resume`}
-          />
+        <div className="h-[calc(100vh-73px)] w-full overflow-auto bg-muted/30 flex flex-col items-center py-4">
+          <Document
+            file={candidate.resumeUrl}
+            onLoadSuccess={onDocumentLoadSuccess}
+            loading={
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }
+            error={
+              <div className="flex items-center justify-center h-full text-destructive">
+                <p>Failed to load PDF. Please try again.</p>
+              </div>
+            }
+          >
+            {Array.from(new Array(numPages), (el, index) => (
+              <Page
+                key={`page_${index + 1}`}
+                pageNumber={index + 1}
+                className="mb-4 shadow-lg"
+                width={Math.min(window.innerWidth - 32, 800)}
+              />
+            ))}
+          </Document>
+          {numPages > 0 && (
+            <div className="sticky bottom-4 mt-4 bg-background/95 backdrop-blur-sm px-4 py-2 rounded-full border border-border">
+              <p className="text-sm text-muted-foreground">
+                {numPages} {numPages === 1 ? 'page' : 'pages'}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Swipe hint */}
