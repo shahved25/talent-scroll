@@ -18,10 +18,10 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    const groqApiKey = Deno.env.get('GROQ_API_KEY');
     
-    if (!openaiApiKey) {
-      throw new Error('OPENAI_API_KEY is not configured');
+    if (!groqApiKey) {
+      throw new Error('GROQ_API_KEY is not configured');
     }
     
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -38,13 +38,13 @@ Deno.serve(async (req) => {
     // Prepare form data for transcription (Whisper accepts video files)
     const formData = new FormData();
     formData.append('file', videoBlob, 'video.mp4');
-    formData.append('model', 'whisper-1');
+    formData.append('model', 'whisper-large-v3');
 
-    // Send to OpenAI Whisper for transcription
-    const transcriptionResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    // Send to Groq Whisper for transcription
+    const transcriptionResponse = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
+        'Authorization': `Bearer ${groqApiKey}`,
       },
       body: formData,
     });
