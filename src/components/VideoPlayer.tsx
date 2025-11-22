@@ -15,6 +15,7 @@ interface Candidate {
   thumbnailUrl: string | null;
   skillTags: string[];
   resumeScore: number | null;
+  videoScore: number | null;
 }
 
 interface VideoPlayerProps {
@@ -205,9 +206,14 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
             <h2 className="mb-2 text-3xl font-bold drop-shadow-lg text-primary tracking-wide">{candidate.name}</h2>
             <p className="mb-2 text-lg text-secondary/90 drop-shadow-md font-mono">{candidate.category}</p>
             
-            {/* Resume Score */}
-            <div className="mb-4">
+            {/* Scores */}
+            <div className="mb-4 flex gap-3">
               <ResumeScore score={candidate.resumeScore} variant="compact" />
+              {candidate.videoScore && (
+                <Badge className="text-blue-400 border-blue-400/50 bg-blue-400/10 backdrop-blur-sm font-mono text-xs px-3 py-1 animate-fade-in">
+                  VIDEO: {candidate.videoScore}/100
+                </Badge>
+              )}
             </div>
             
             {/* Skill Tags */}
