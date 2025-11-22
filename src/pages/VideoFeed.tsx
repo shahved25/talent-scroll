@@ -79,6 +79,33 @@ const VideoFeed = () => {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [currentIndex, candidates.length]);
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      if (e.key === "ArrowDown" && currentIndex < candidates.length - 1) {
+        e.preventDefault();
+        const nextIndex = currentIndex + 1;
+        container.scrollTo({
+          top: nextIndex * window.innerHeight,
+          behavior: "smooth",
+        });
+      } else if (e.key === "ArrowUp" && currentIndex > 0) {
+        e.preventDefault();
+        const prevIndex = currentIndex - 1;
+        container.scrollTo({
+          top: prevIndex * window.innerHeight,
+          behavior: "smooth",
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex, candidates.length]);
+
   if (candidates.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
