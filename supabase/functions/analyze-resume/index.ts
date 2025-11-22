@@ -22,26 +22,11 @@ Deno.serve(async (req) => {
     
     console.log('Analyzing resume for:', candidateName, 'Category:', category);
 
-    // Fetch the resume PDF
+    // Fetch the resume PDF to verify it exists
     const resumeResponse = await fetch(resumeUrl);
     if (!resumeResponse.ok) {
       throw new Error('Failed to fetch resume');
     }
-    
-    const resumeBlob = await resumeResponse.blob();
-    const resumeBuffer = await resumeBlob.arrayBuffer();
-    
-    // Convert to base64 in chunks to avoid stack overflow
-    const uint8Array = new Uint8Array(resumeBuffer);
-    let binaryString = '';
-    const chunkSize = 8192;
-    
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.subarray(i, i + chunkSize);
-      binaryString += String.fromCharCode(...chunk);
-    }
-    
-    const resumeBase64 = btoa(binaryString);
 
     // Call Lovable AI API
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
@@ -49,7 +34,7 @@ Deno.serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const aiResponse = await fetch('https://api.lovable.app/v1/chat/completions', {
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${lovableApiKey}`,
@@ -60,12 +45,10 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `You are an expert technical recruiter analyzing a resume for a ${category} position. 
-                
-Analyze this resume and provide:
+            content: `You are an expert technical recruiter analyzing a resume for a ${category} position.
+
+I will provide you with a resume PDF. Please analyze it and provide:
+
 1. An overall score (0-100) based on:
    - Technical skills relevance (30%)
    - Experience quality and relevance (30%)
@@ -77,6 +60,8 @@ Analyze this resume and provide:
 3. Top 3-4 areas for improvement (brief bullet points)
 4. A concise 2-3 sentence summary
 
+The resume is available at: ${resumeUrl}
+
 Respond ONLY with valid JSON in this exact format:
 {
   "score": 85,
@@ -84,14 +69,6 @@ Respond ONLY with valid JSON in this exact format:
   "improvements": ["Add more metrics", "Include certifications"],
   "summary": "Strong candidate with relevant experience."
 }`
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:application/pdf;base64,${resumeBase64}`
-                }
-              }
-            ]
           }
         ],
         max_tokens: 1000
