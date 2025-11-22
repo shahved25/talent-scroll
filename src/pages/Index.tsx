@@ -2,51 +2,18 @@ import { useNavigate } from "react-router-dom";
 import { Heart, Users, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
-const iconMap: { [key: string]: string } = {
-  'backend-engineer': '⚙️',
-  'frontend-engineer': '💻',
-  'full-stack-developer': '🚀',
-  'devops-engineer': '🔧',
-  'data-scientist': '📈',
-  'product-manager': '📊'
-};
-
-const colorMap: { [key: string]: string } = {
-  'backend-engineer': 'from-blue-500 to-cyan-500',
-  'frontend-engineer': 'from-green-500 to-teal-500',
-  'full-stack-developer': 'from-purple-500 to-pink-500',
-  'devops-engineer': 'from-yellow-500 to-orange-500',
-  'data-scientist': 'from-indigo-500 to-purple-500',
-  'product-manager': 'from-orange-500 to-red-500'
-};
+const categories = [
+  { id: "ui-designer", name: "UI Designer", icon: "🎨", color: "from-purple-500 to-pink-500" },
+  { id: "backend-engineer", name: "Backend Engineer", icon: "⚙️", color: "from-blue-500 to-cyan-500" },
+  { id: "frontend-developer", name: "Frontend Developer", icon: "💻", color: "from-green-500 to-teal-500" },
+  { id: "product-manager", name: "Product Manager", icon: "📊", color: "from-orange-500 to-red-500" },
+  { id: "data-scientist", name: "Data Scientist", icon: "📈", color: "from-indigo-500 to-purple-500" },
+  { id: "devops-engineer", name: "DevOps Engineer", icon: "🔧", color: "from-yellow-500 to-orange-500" },
+];
 
 const Index = () => {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string; icon: string; color: string }>>([]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const { data } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-
-      if (data) {
-        setCategories(data.map(cat => ({
-          id: cat.slug,
-          name: cat.name,
-          slug: cat.slug,
-          icon: iconMap[cat.slug] || '📁',
-          color: colorMap[cat.slug] || 'from-gray-500 to-gray-700'
-        })));
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
