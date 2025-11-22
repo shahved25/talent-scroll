@@ -78,7 +78,7 @@ const CandidateSubmission = () => {
         .getPublicUrl(videoPath);
 
       // Insert candidate
-      const { error: insertError } = await supabase
+      const { data: candidateData, error: insertError } = await supabase
         .from('candidates')
         .insert({
           name: formData.name,
@@ -86,9 +86,36 @@ const CandidateSubmission = () => {
           resume_url: resumeUrl,
           video_url: videoUrl,
           skill_tags: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
-        });
+        })
+        .select()
+        .single();
 
       if (insertError) throw insertError;
+
+      // Analyze resume with Lovable AI and update score
+      const selectedCategory = categories.find(c => c.id === formData.categoryId);
+      if (candidateData && selectedCategory) {
+        try {
+          const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-resume', {
+            body: {
+              resumeUrl,
+              candidateName: formData.name,
+              category: selectedCategory.name,
+            }
+          });
+
+          if (!analysisError && analysisData?.score) {
+            // Update candidate with resume score
+            await supabase
+              .from('candidates')
+              .update({ resume_score: analysisData.score })
+              .eq('id', candidateData.id);
+          }
+        } catch (error) {
+          console.error('Error analyzing resume:', error);
+          // Continue even if analysis fails
+        }
+      }
 
       toast({
         title: "Success!",

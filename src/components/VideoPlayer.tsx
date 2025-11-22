@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import ResumeScore from "@/components/ResumeScore";
 
 interface Candidate {
   id: string;
@@ -13,6 +14,7 @@ interface Candidate {
   resumeUrl: string;
   thumbnailUrl: string | null;
   skillTags: string[];
+  resumeScore: number | null;
 }
 
 interface VideoPlayerProps {
@@ -185,7 +187,12 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
           {/* Candidate Info */}
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white bg-gradient-to-t from-black via-black/80 to-transparent">
             <h2 className="mb-2 text-3xl font-bold drop-shadow-lg text-primary tracking-wide">{candidate.name}</h2>
-            <p className="mb-4 text-lg text-secondary/90 drop-shadow-md font-mono">{candidate.category}</p>
+            <p className="mb-2 text-lg text-secondary/90 drop-shadow-md font-mono">{candidate.category}</p>
+            
+            {/* Resume Score */}
+            <div className="mb-4">
+              <ResumeScore score={candidate.resumeScore} variant="compact" />
+            </div>
             
             {/* Skill Tags */}
             <div className="mb-6 flex flex-wrap gap-2">

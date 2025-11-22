@@ -17,6 +17,7 @@ interface ShortlistedCandidate {
   thumbnail_url?: string;
   skill_tags: string[];
   created_at: string;
+  resume_score?: number | null;
 }
 
 const Shortlist = () => {
@@ -249,6 +250,7 @@ const Shortlist = () => {
             resumeUrl: selectedCandidate.resume_url,
             thumbnailUrl: selectedCandidate.thumbnail_url,
             skillTags: selectedCandidate.skill_tags,
+            resumeScore: selectedCandidate.resume_score || null,
           }}
         />
       )}
