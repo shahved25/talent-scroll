@@ -95,26 +95,33 @@ const CandidateSubmission = () => {
       // Analyze resume with Lovable AI and update score
       const selectedCategory = categories.find(c => c.id === formData.categoryId);
       if (candidateData && selectedCategory) {
-        try {
-          const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-resume', {
-            body: {
-              resumeUrl,
-              candidateName: formData.name,
-              category: selectedCategory.name,
-            }
-          });
-
+        // Start resume analysis
+        supabase.functions.invoke('analyze-resume', {
+          body: {
+            resumeUrl,
+            candidateName: formData.name,
+            category: selectedCategory.name,
+          }
+        }).then(({ data: analysisData, error: analysisError }) => {
           if (!analysisError && analysisData?.score) {
-            // Update candidate with resume score
-            await supabase
+            supabase
               .from('candidates')
               .update({ resume_score: analysisData.score })
               .eq('id', candidateData.id);
           }
-        } catch (error) {
+        }).catch(error => {
           console.error('Error analyzing resume:', error);
-          // Continue even if analysis fails
-        }
+        });
+
+        // Start video to audio conversion
+        supabase.functions.invoke('convert-video-to-audio', {
+          body: {
+            videoUrl,
+            candidateId: candidateData.id,
+          }
+        }).catch(error => {
+          console.error('Error converting video to audio:', error);
+        });
       }
 
       toast({
