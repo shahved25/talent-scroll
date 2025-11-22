@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import ResumeScore from "@/components/ResumeScore";
 import VideoScore from "@/components/VideoScore";
+import EnglishScore from "@/components/EnglishScore";
 
 interface Candidate {
   id: string;
@@ -17,6 +18,7 @@ interface Candidate {
   skillTags: string[];
   resumeScore: number | null;
   videoScore: number | null;
+  englishProficiency: number | null;
 }
 
 interface VideoPlayerProps {
@@ -213,8 +215,13 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
             </div>
             
             {/* Video Score */}
-            <div className="mb-4">
+            <div className="mb-2">
               <VideoScore score={candidate.videoScore} variant="compact" />
+            </div>
+            
+            {/* English Proficiency Score */}
+            <div className="mb-4">
+              <EnglishScore score={candidate.englishProficiency} variant="compact" />
             </div>
             
             {/* Skill Tags */}

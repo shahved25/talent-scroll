@@ -12,6 +12,7 @@ interface VideoAnalysis {
   confidence: number;
   clarity: number;
   professionalism: number;
+  english_proficiency: number;
   key_points: string[];
   red_flags: string[];
   summary: string;
@@ -67,6 +68,7 @@ Provide a comprehensive analysis with:
    - confidence
    - clarity
    - professionalism
+   - english_proficiency (English language assessment based on grammar accuracy, vocabulary diversity, fluency, professional language use, coherence, sentence structure, appropriate tense usage, and minimal filler words)
 
 3. Key strengths/points (3-5 bullet points)
 4. Any red flags or concerns (if any)
@@ -79,6 +81,7 @@ Respond ONLY with valid JSON in this exact format:
   "confidence": 82,
   "clarity": 90,
   "professionalism": 85,
+  "english_proficiency": 87,
   "key_points": ["Strong technical communication", "Clear problem-solving approach"],
   "red_flags": ["Mentioned lacking experience in X"],
   "summary": "Strong candidate with excellent communication skills."
@@ -110,14 +113,17 @@ Respond ONLY with valid JSON in this exact format:
     
     console.log('Video analysis complete:', analysis.score);
 
-    // Update candidate with video analysis score
+    // Update candidate with video analysis score and English proficiency
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { error: updateError } = await supabase
       .from('candidates')
-      .update({ video_score: analysis.score })
+      .update({ 
+        video_score: analysis.score,
+        english_proficiency: analysis.english_proficiency
+      })
       .eq('id', candidateId);
 
     if (updateError) {
@@ -186,6 +192,7 @@ Respond ONLY with valid JSON in this exact format:
         confidence: 0,
         clarity: 0,
         professionalism: 0,
+        english_proficiency: 0,
         key_points: [],
         red_flags: [],
         summary: 'Unable to analyze video at this time.'
