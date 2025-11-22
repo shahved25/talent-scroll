@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface Candidate {
   id: string;
   name: string;
-  role: string;
+  category: string;
   videoUrl: string;
   resumeUrl: string;
   thumbnailUrl: string | null;
@@ -42,11 +42,13 @@ const VideoFeed = () => {
           candidates (
             id,
             name,
-            role,
             video_url,
             resume_url,
             thumbnail_url,
             skill_tags
+          ),
+          categories (
+            name
           )
         `)
         .eq('category_id', categoryData.id);
@@ -57,7 +59,7 @@ const VideoFeed = () => {
           .map((item: any) => ({
             id: item.candidates.id,
             name: item.candidates.name,
-            role: item.candidates.role,
+            category: item.categories?.name || '',
             videoUrl: item.candidates.video_url,
             resumeUrl: item.candidates.resume_url,
             thumbnailUrl: item.candidates.thumbnail_url,

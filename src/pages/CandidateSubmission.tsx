@@ -17,7 +17,6 @@ const CandidateSubmission = () => {
   
   const [formData, setFormData] = useState({
     name: "",
-    role: "",
     skills: "",
     categoryId: "",
   });
@@ -83,7 +82,6 @@ const CandidateSubmission = () => {
         .from('candidates')
         .insert({
           name: formData.name,
-          role: formData.role,
           resume_url: resumeUrl,
           video_url: videoUrl,
           skill_tags: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
@@ -150,17 +148,6 @@ const CandidateSubmission = () => {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 placeholder="John Doe"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="role">Role/Title</Label>
-              <Input
-                id="role"
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                required
-                placeholder="UI/UX Designer"
               />
             </div>
 

@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface Candidate {
   id: string;
   name: string;
-  role: string;
+  category: string;
   videoUrl: string;
   resumeUrl: string;
   thumbnailUrl: string | null;
@@ -42,7 +42,7 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
     try {
       const { error } = await supabase.from("shortlisted_candidates").insert({
         candidate_name: candidate.name,
-        candidate_role: candidate.role,
+        candidate_role: candidate.category,
         video_url: candidate.videoUrl,
         resume_url: candidate.resumeUrl,
         thumbnail_url: candidate.thumbnailUrl,
@@ -126,7 +126,7 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
             <h2 className="text-xl font-semibold text-foreground">
               {candidate.name}
             </h2>
-            <p className="text-sm text-muted-foreground">{candidate.role}</p>
+            <p className="text-sm text-muted-foreground">{candidate.category}</p>
           </div>
 
           <Button onClick={handleShortlist} className="gap-2">

@@ -8,7 +8,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 interface Candidate {
   id: string;
   name: string;
-  role: string;
+  category: string;
   videoUrl: string;
   resumeUrl: string;
   thumbnailUrl: string | null;
@@ -63,7 +63,7 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
     try {
       const { error } = await supabase.from("shortlisted_candidates").insert({
         candidate_name: candidate.name,
-        candidate_role: candidate.role,
+        candidate_role: candidate.category,
         video_url: candidate.videoUrl,
         resume_url: candidate.resumeUrl,
         thumbnail_url: candidate.thumbnailUrl,
@@ -169,7 +169,7 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
           {/* Candidate Info */}
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
             <h2 className="mb-2 text-3xl font-bold drop-shadow-lg">{candidate.name}</h2>
-            <p className="mb-4 text-lg text-white/90 drop-shadow-md">{candidate.role}</p>
+            <p className="mb-4 text-lg text-white/90 drop-shadow-md">{candidate.category}</p>
             
             {/* Skill Tags */}
             <div className="mb-6 flex flex-wrap gap-2">
