@@ -19,7 +19,6 @@ const CandidateSubmission = () => {
     name: "",
     skills: "",
     categoryId: "",
-    portfolioUrl: "",
   });
   
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -86,7 +85,6 @@ const CandidateSubmission = () => {
           category_id: formData.categoryId,
           resume_url: resumeUrl,
           video_url: videoUrl,
-          portfolio_url: formData.portfolioUrl || null,
           skill_tags: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
         })
         .select()
@@ -216,22 +214,7 @@ const CandidateSubmission = () => {
               />
             </div>
 
-            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.55s' }}>
-              <Label htmlFor="portfolioUrl" className="text-primary font-mono">Portfolio URL (Optional)</Label>
-              <Input
-                id="portfolioUrl"
-                type="url"
-                value={formData.portfolioUrl}
-                onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
-                placeholder="https://yourportfolio.com"
-                className="border-primary/30 focus:border-primary transition-all duration-300"
-              />
-              <p className="text-xs text-muted-foreground font-mono">
-                &gt; Portfolio_website_or_PDF_URL
-              </p>
-            </div>
-
-            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.65s' }}>
+            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.6s' }}>
               <Label htmlFor="resume" className="text-primary font-mono">Resume (PDF)</Label>
               <div className="relative group">
                 <Input
@@ -251,7 +234,7 @@ const CandidateSubmission = () => {
               )}
             </div>
 
-            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.75s' }}>
+            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.7s' }}>
               <Label htmlFor="video" className="text-primary font-mono">Introduction Video (MP4, MOV)</Label>
               <div className="relative group">
                 <Input
@@ -276,7 +259,7 @@ const CandidateSubmission = () => {
               disabled={isSubmitting}
               className="w-full font-mono tracking-wide relative overflow-hidden group animate-bounce-in"
               size="lg"
-              style={{ animationDelay: '0.85s' }}
+              style={{ animationDelay: '0.8s' }}
             >
               {/* Button glow effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_100%] animate-gradient-x opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
