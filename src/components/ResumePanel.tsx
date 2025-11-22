@@ -4,6 +4,7 @@ import { Heart, X, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Document, Page, pdfjs } from 'react-pdf';
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -115,7 +116,7 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
       {/* Sliding Panel */}
       <div
         ref={panelRef}
-        className={`fixed inset-y-0 right-0 z-50 w-full bg-background shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed inset-0 z-50 w-full bg-black shadow-2xl transition-transform duration-300 ease-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         onTouchStart={handleTouchStart}
@@ -124,68 +125,63 @@ const ResumePanel = ({ isOpen, onClose, candidate }: ResumePanelProps) => {
         onMouseUp={handleMouseUp}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border bg-background/95 backdrop-blur-sm px-6 py-4">
+        <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent p-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="gap-2"
+            className="text-white hover:bg-white/20"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-6 w-6" />
           </Button>
 
           <div className="flex-1 text-center">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-xl font-semibold text-white drop-shadow-lg">
               {candidate.name}
             </h2>
-            <p className="text-sm text-muted-foreground">{candidate.category}</p>
+            <p className="text-sm text-white/90 drop-shadow-md">{candidate.category}</p>
           </div>
 
-          <Button onClick={handleShortlist} className="gap-2">
+          <Button 
+            onClick={handleShortlist} 
+            className="gap-2 bg-primary text-primary-foreground hover:scale-110 transition-transform"
+          >
             <Heart className="h-4 w-4" />
             <span className="hidden sm:inline">Shortlist</span>
           </Button>
         </div>
 
-        {/* PDF Viewer */}
-        <div className="h-[calc(100vh-73px)] w-full overflow-auto bg-muted/30 flex flex-col items-center py-4">
-          <Document
-            file={candidate.resumeUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            loading={
-              <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        {/* PDF Viewer - Centered 9:16 */}
+        <div className="h-screen w-full flex items-center justify-center bg-black">
+          <div className="w-full max-w-[56.25vh] px-4">
+            <AspectRatio ratio={9 / 16}>
+              <div className="h-full w-full overflow-auto bg-white rounded-xl">
+                <Document
+                  file={candidate.resumeUrl}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                  loading={
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  }
+                  error={
+                    <div className="flex items-center justify-center h-full text-destructive p-4 text-center">
+                      <p>Failed to load PDF. Please try again.</p>
+                    </div>
+                  }
+                  className="h-full"
+                >
+                  {Array.from(new Array(numPages), (el, index) => (
+                    <Page
+                      key={`page_${index + 1}`}
+                      pageNumber={index + 1}
+                      className="mb-2"
+                      width={Math.min(window.innerWidth * 0.9, 600)}
+                    />
+                  ))}
+                </Document>
               </div>
-            }
-            error={
-              <div className="flex items-center justify-center h-full text-destructive">
-                <p>Failed to load PDF. Please try again.</p>
-              </div>
-            }
-          >
-            {Array.from(new Array(numPages), (el, index) => (
-              <Page
-                key={`page_${index + 1}`}
-                pageNumber={index + 1}
-                className="mb-4 shadow-lg"
-                width={Math.min(window.innerWidth - 32, 800)}
-              />
-            ))}
-          </Document>
-          {numPages > 0 && (
-            <div className="sticky bottom-4 mt-4 bg-background/95 backdrop-blur-sm px-4 py-2 rounded-full border border-border">
-              <p className="text-sm text-muted-foreground">
-                {numPages} {numPages === 1 ? 'page' : 'pages'}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Swipe hint */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 pointer-events-none">
-          <div className="flex items-center gap-2 text-sm">
-            <ChevronLeft className="h-4 w-4 animate-pulse" />
-            <span className="hidden sm:inline">Swipe or drag left to close</span>
+            </AspectRatio>
           </div>
         </div>
       </div>
