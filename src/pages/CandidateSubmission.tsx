@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,20 +7,34 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Video, FileText, ArrowLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CandidateSubmission = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([]);
   
   const [formData, setFormData] = useState({
     name: "",
     role: "",
     skills: "",
+    categoryId: "",
   });
   
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      if (data) setCategories(data);
+    };
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +79,7 @@ const CandidateSubmission = () => {
         .getPublicUrl(videoPath);
 
       // Insert candidate
-      const { error: insertError } = await supabase
+      const { data: candidateData, error: insertError } = await supabase
         .from('candidates')
         .insert({
           name: formData.name,
@@ -73,9 +87,23 @@ const CandidateSubmission = () => {
           resume_url: resumeUrl,
           video_url: videoUrl,
           skill_tags: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
-        });
+        })
+        .select()
+        .single();
 
       if (insertError) throw insertError;
+
+      // Link candidate to category
+      if (candidateData && formData.categoryId) {
+        const { error: linkError } = await supabase
+          .from('candidate_categories')
+          .insert({
+            candidate_id: candidateData.id,
+            category_id: formData.categoryId,
+          });
+
+        if (linkError) throw linkError;
+      }
 
       toast({
         title: "Success!",
@@ -134,6 +162,26 @@ const CandidateSubmission = () => {
                 required
                 placeholder="UI/UX Designer"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={formData.categoryId}
+                onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
+                required
+              >
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
