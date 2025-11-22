@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import ResumeScore from "@/components/ResumeScore";
+import VideoScore from "@/components/VideoScore";
 
 interface Candidate {
   id: string;
@@ -15,6 +16,7 @@ interface Candidate {
   thumbnailUrl: string | null;
   skillTags: string[];
   resumeScore: number | null;
+  videoScore: number | null;
 }
 
 interface VideoPlayerProps {
@@ -206,8 +208,13 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
             <p className="mb-2 text-lg text-secondary/90 drop-shadow-md font-mono">{candidate.category}</p>
             
             {/* Resume Score */}
-            <div className="mb-4">
+            <div className="mb-2">
               <ResumeScore score={candidate.resumeScore} variant="compact" />
+            </div>
+            
+            {/* Video Score */}
+            <div className="mb-4">
+              <VideoScore score={candidate.videoScore} variant="compact" />
             </div>
             
             {/* Skill Tags */}
