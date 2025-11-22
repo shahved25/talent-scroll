@@ -65,7 +65,7 @@ const CandidateSubmission = () => {
         .getPublicUrl(videoPath);
 
       // Insert candidate
-      const { error: insertError } = await supabase
+      const { data: candidateData, error: insertError } = await supabase
         .from('candidates')
         .insert({
           name: formData.name,
@@ -73,9 +73,40 @@ const CandidateSubmission = () => {
           resume_url: resumeUrl,
           video_url: videoUrl,
           skill_tags: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
-        });
+        })
+        .select()
+        .single();
 
       if (insertError) throw insertError;
+
+      // Link to category based on role
+      const roleToSlugMap: { [key: string]: string } = {
+        'Frontend Developer': 'frontend-engineer',
+        'Backend Engineer': 'backend-engineer',
+        'Full Stack Developer': 'full-stack-developer',
+        'DevOps Engineer': 'devops-engineer',
+        'Data Scientist': 'data-scientist',
+        'Product Manager': 'product-manager'
+      };
+
+      const categorySlug = roleToSlugMap[formData.role];
+      
+      if (categorySlug) {
+        const { data: categoryData } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('slug', categorySlug)
+          .single();
+
+        if (categoryData) {
+          await supabase
+            .from('candidate_categories')
+            .insert({
+              candidate_id: candidateData.id,
+              category_id: categoryData.id
+            });
+        }
+      }
 
       toast({
         title: "Success!",

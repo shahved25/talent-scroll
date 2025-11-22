@@ -4,8 +4,18 @@ import { ArrowLeft, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
 import ResumePanel from "@/components/ResumePanel";
-import { getCandidatesByCategory } from "@/data/mockData";
-import type { Candidate } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Candidate {
+  id: string;
+  name: string;
+  role: string;
+  videoUrl: string;
+  resumeUrl: string;
+  thumbnailUrl?: string;
+  skillTags: string[];
+}
 
 const VideoFeed = () => {
   const { category } = useParams<{ category: string }>();
@@ -13,14 +23,75 @@ const VideoFeed = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (category) {
-      const categoryCandidates = getCandidatesByCategory(category);
-      setCandidates(categoryCandidates);
-    }
-  }, [category]);
+    const fetchCandidates = async () => {
+      if (!category) return;
+      
+      setLoading(true);
+      try {
+        // First get the category ID from the slug
+        const { data: categoryData, error: categoryError } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('slug', category)
+          .single();
+
+        if (categoryError) throw categoryError;
+
+        // Then get candidate IDs from the junction table
+        const { data: candidateCategoryData, error: junctionError } = await supabase
+          .from('candidate_categories')
+          .select('candidate_id')
+          .eq('category_id', categoryData.id);
+
+        if (junctionError) throw junctionError;
+
+        if (!candidateCategoryData || candidateCategoryData.length === 0) {
+          setCandidates([]);
+          setLoading(false);
+          return;
+        }
+
+        const candidateIds = candidateCategoryData.map(cc => cc.candidate_id);
+
+        // Finally get the full candidate data
+        const { data: candidatesData, error: candidatesError } = await supabase
+          .from('candidates')
+          .select('*')
+          .in('id', candidateIds);
+
+        if (candidatesError) throw candidatesError;
+
+        // Transform to match our interface
+        const transformedCandidates: Candidate[] = (candidatesData || []).map(c => ({
+          id: c.id,
+          name: c.name,
+          role: c.role,
+          videoUrl: c.video_url,
+          resumeUrl: c.resume_url,
+          thumbnailUrl: c.thumbnail_url || undefined,
+          skillTags: c.skill_tags || []
+        }));
+
+        setCandidates(transformedCandidates);
+      } catch (error) {
+        console.error('Error fetching candidates:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load candidates",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCandidates();
+  }, [category, toast]);
 
   const handleScroll = () => {
     if (!containerRef.current) return;
@@ -42,6 +113,16 @@ const VideoFeed = () => {
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [currentIndex, candidates.length]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-xl text-muted-foreground">Loading candidates...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (candidates.length === 0) {
     return (
