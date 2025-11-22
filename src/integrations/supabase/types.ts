@@ -14,6 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
+      candidate_categories: {
+        Row: {
+          candidate_id: string
+          category_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          candidate_id: string
+          category_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          candidate_id?: string
+          category_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_categories_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          resume_url: string
+          role: string
+          skill_tags: string[] | null
+          thumbnail_url: string | null
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          resume_url: string
+          role: string
+          skill_tags?: string[] | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          resume_url?: string
+          role?: string
+          skill_tags?: string[] | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       shortlisted_candidates: {
         Row: {
           candidate_name: string
