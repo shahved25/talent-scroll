@@ -153,7 +153,6 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
             className="absolute inset-0 h-full w-full object-cover rounded-xl"
             loop
             playsInline
-            muted
           />
 
           {/* Gradient Overlay */}
