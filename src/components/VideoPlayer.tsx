@@ -224,10 +224,14 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
             </div>
 
             {/* Instructions */}
-            <div className="flex items-center justify-start text-sm text-muted-foreground font-mono">
+            <div className="flex items-center justify-between text-sm text-muted-foreground font-mono">
               <div className="flex items-center gap-2">
                 <Heart className="h-4 w-4 text-accent" />
                 <span>DOUBLE_TAP</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-secondary" />
+                <span>SWIPE_RIGHT</span>
               </div>
             </div>
           </div>
@@ -243,7 +247,7 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
           {/* Resume Button (visible on desktop) */}
           <button
             onClick={onSwipeRight}
-            className="absolute bottom-24 right-6 hidden md:flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_hsl(160_100%_45%/0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_hsl(160_100%_45%/0.7)] group"
+            className="absolute bottom-24 right-6 hidden md:flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_hsl(160_100%_45%/0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_hsl(160_100%_45%/0.7)] animate-float group"
           >
             <FileText className="h-6 w-6 group-hover:animate-pulse" />
             <div className="absolute inset-0 rounded-full border-2 border-primary/50 animate-ping-slow" />
