@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Heart, Users } from "lucide-react";
+import { Heart, Users, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -26,14 +26,24 @@ const Index = () => {
             </div>
             <h1 className="text-2xl font-bold text-foreground">Recruiter TikTok</h1>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => navigate("/shortlist")}
-            className="gap-2"
-          >
-            <Heart className="h-4 w-4 text-accent" />
-            <span>Shortlist</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/submit")}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              <span>Submit Profile</span>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/shortlist")}
+              className="gap-2"
+            >
+              <Heart className="h-4 w-4 text-accent" />
+              <span>Shortlist</span>
+            </Button>
+          </div>
         </div>
       </header>
 
