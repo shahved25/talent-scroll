@@ -18,6 +18,8 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
   const lastTapTime = useRef<number>(0);
+  const isDragging = useRef<boolean>(false);
+  const mouseStartX = useRef<number>(0);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -80,6 +82,34 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
     handleSwipe();
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    mouseStartX.current = e.clientX;
+    isDragging.current = true;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    
+    const currentX = e.clientX;
+    const distance = currentX - mouseStartX.current;
+    
+    // Visual feedback could be added here (e.g., slight translation)
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    
+    const currentX = e.clientX;
+    const distance = currentX - mouseStartX.current;
+    
+    isDragging.current = false;
+    
+    if (distance > 100) {
+      // Drag right detected
+      onSwipeRight();
+    }
+  };
+
   const handleSwipe = () => {
     const swipeDistance = touchEndX.current - touchStartX.current;
     if (swipeDistance > 100) {
@@ -90,13 +120,19 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
 
   return (
     <div
-      className="relative h-screen w-full snap-start snap-always overflow-hidden bg-black"
+      className="relative h-screen w-full snap-start snap-always overflow-hidden bg-black cursor-pointer"
       onTouchStart={handleTouchStart}
       onTouchEnd={(e) => {
         handleTouchEnd(e);
         handleDoubleTap(e);
       }}
       onDoubleClick={handleDoubleTap}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={() => {
+        isDragging.current = false;
+      }}
     >
       {/* Video */}
       <video

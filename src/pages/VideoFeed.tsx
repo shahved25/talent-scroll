@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
-import ResumeModal from "@/components/ResumeModal";
+import ResumePanel from "@/components/ResumePanel";
 import { getCandidatesByCategory } from "@/data/mockData";
 import type { Candidate } from "@/data/mockData";
 
@@ -95,8 +95,8 @@ const VideoFeed = () => {
         ))}
       </div>
 
-      {/* Resume Modal */}
-      <ResumeModal
+      {/* Resume Panel */}
+      <ResumePanel
         isOpen={showResumeModal}
         onClose={() => setShowResumeModal(false)}
         candidate={candidates[currentIndex]}
