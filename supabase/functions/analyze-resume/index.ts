@@ -30,7 +30,18 @@ Deno.serve(async (req) => {
     
     const resumeBlob = await resumeResponse.blob();
     const resumeBuffer = await resumeBlob.arrayBuffer();
-    const resumeBase64 = btoa(String.fromCharCode(...new Uint8Array(resumeBuffer)));
+    
+    // Convert to base64 in chunks to avoid stack overflow
+    const uint8Array = new Uint8Array(resumeBuffer);
+    let binaryString = '';
+    const chunkSize = 8192;
+    
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, i + chunkSize);
+      binaryString += String.fromCharCode(...chunk);
+    }
+    
+    const resumeBase64 = btoa(binaryString);
 
     // Call Lovable AI API
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
