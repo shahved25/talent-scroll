@@ -1,1 +1,7 @@
 project_id = "dwdhjybrstwivfsazlkx"
+
+[functions.analyze-resume]
+verify_jwt = false
+
+[functions.analyze-video]
+verify_jwt = false
