@@ -101,13 +101,7 @@ const CandidateSubmission = () => {
             resumeUrl,
             candidateName: formData.name,
             category: selectedCategory.name,
-          }
-        }).then(({ data: analysisData, error: analysisError }) => {
-          if (!analysisError && analysisData?.score) {
-            supabase
-              .from('candidates')
-              .update({ resume_score: analysisData.score })
-              .eq('id', candidateData.id);
+            candidateId: candidateData.id,
           }
         }).catch(error => {
           console.error('Error analyzing resume:', error);

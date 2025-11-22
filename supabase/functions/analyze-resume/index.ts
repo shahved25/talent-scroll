@@ -20,9 +20,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { resumeUrl, candidateName, category } = await req.json();
+    const { resumeUrl, candidateName, category, candidateId } = await req.json();
     
     console.log('Analyzing resume for:', candidateName, 'Category:', category);
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const groqApiKey = Deno.env.get('GROQ_API_KEY');
     if (!groqApiKey) {
@@ -116,6 +120,55 @@ Respond ONLY with valid JSON in this exact format:
     const analysis: ResumeAnalysis = JSON.parse(jsonContent.trim());
     
     console.log('Analysis complete:', analysis.score);
+
+    // Update candidate record with resume score
+    if (candidateId) {
+      const { error: updateError } = await supabase
+        .from('candidates')
+        .update({ resume_score: analysis.score })
+        .eq('id', candidateId);
+
+      if (updateError) {
+        console.error('Update error:', updateError);
+      } else {
+        console.log('Resume score saved:', analysis.score);
+        
+        // Check if video analysis is complete before calculating final score
+        const { data: candidateCheck } = await supabase
+          .from('candidates')
+          .select('video_score, category_id')
+          .eq('id', candidateId)
+          .single();
+
+        // Only calculate final score if both analyses are complete
+        if (candidateCheck?.video_score) {
+          console.log('Both analyses complete, triggering final score calculation...');
+          try {
+            const finalScoreResponse = await fetch(`${supabaseUrl}/functions/v1/calculate-final-score`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseKey}`,
+              },
+              body: JSON.stringify({
+                candidateId,
+                category
+              })
+            });
+
+            if (finalScoreResponse.ok) {
+              console.log('Final score calculation completed successfully');
+            } else {
+              console.error('Final score calculation failed:', await finalScoreResponse.text());
+            }
+          } catch (finalScoreError) {
+            console.error('Error triggering final score calculation:', finalScoreError);
+          }
+        } else {
+          console.log('Video analysis not yet complete, skipping final score calculation');
+        }
+      }
+    }
 
     return new Response(
       JSON.stringify(analysis),
