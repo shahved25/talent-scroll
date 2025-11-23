@@ -52,28 +52,6 @@ const CandidateInsights = ({ resumeScore, videoScore, className = "" }: Candidat
     <div className={`space-y-4 ${className}`}>
       {/* Individual Scores Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Resume Score */}
-        {resumeScore && (
-          <Card className="p-4 border-2 border-primary/30 bg-card/50 backdrop-blur-sm hover:border-primary hover:shadow-[0_0_20px_hsl(160_100%_45%/0.2)] transition-all duration-300 animate-slide-in-left">
-            <div className="flex items-center gap-3 mb-3">
-              <FileText className="h-5 w-5 text-primary" />
-              <span className="text-sm font-mono text-muted-foreground">RESUME ANALYSIS</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className={`text-4xl font-bold ${getScoreColor(resumeScore).split(' ')[0]}`}>
-                {resumeScore}
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground">/100</span>
-                <Badge className={`${getScoreColor(resumeScore)} backdrop-blur-sm font-mono text-xs`}>
-                  {resumeScore >= 80 ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
-                  {resumeScore >= 80 ? "STRONG" : resumeScore >= 60 ? "GOOD" : "WEAK"}
-                </Badge>
-              </div>
-            </div>
-          </Card>
-        )}
-
       </div>
 
       {/* AI Badge */}
