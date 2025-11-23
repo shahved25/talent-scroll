@@ -51,88 +51,80 @@ serve(async (req) => {
       );
     }
 
-    // Try multiple screenshot services with fallbacks
-    const services = [
-      {
-        name: 'screenshotmachine',
-        url: `https://api.screenshotmachine.com/?key=demo&url=${encodeURIComponent(url)}&dimension=1200x800`
-      },
-      {
-        name: 'apiflash-demo',
-        url: `https://api.apiflash.com/v1/urltoimage?access_key=demo&url=${encodeURIComponent(url)}&width=1200&height=800&fresh=true`
-      }
-    ];
-
-    let screenshotBlob = null;
-    let successService = null;
-
-    for (const service of services) {
-      try {
-        console.log(`Trying ${service.name}...`);
-        const screenshotResponse = await fetch(service.url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; ScreenshotBot/1.0)'
-          }
-        });
-        
-        if (screenshotResponse.ok) {
-          screenshotBlob = await screenshotResponse.blob();
-          successService = service.name;
-          console.log(`Success with ${service.name}`);
-          break;
-        } else {
-          console.log(`${service.name} failed with status:`, screenshotResponse.status);
+    // Use a simple, reliable screenshot service that works with plain URLs
+    // Microlink.io has a generous free tier and doesn't require API keys for basic usage
+    const screenshotApiUrl = `https://api.microlink.io/?url=${url}&screenshot=true&meta=false&embed=screenshot.url`;
+    
+    console.log('Fetching screenshot from Microlink API...');
+    
+    let screenshotUrl = null;
+    
+    try {
+      const response = await fetch(screenshotApiUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; ScreenshotBot/1.0)'
         }
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        console.log(`${service.name} error:`, errorMsg);
-        continue;
-      }
-    }
-
-    // If all services failed, return a graceful error that the frontend can handle
-    if (!screenshotBlob) {
-      console.log('All screenshot services failed, returning fallback response');
-      return new Response(
-        JSON.stringify({ 
-          screenshotUrl: null, 
-          error: 'Screenshot generation unavailable',
-          fallback: true 
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-      );
-    }
-
-    const screenshotBuffer = await screenshotBlob.arrayBuffer();
-
-    // Upload to Supabase storage for caching
-    const { error: uploadError } = await supabase.storage
-      .from('videos')
-      .upload(cacheKey, screenshotBuffer, {
-        contentType: 'image/jpeg',
-        upsert: true
       });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'success' && data.data?.screenshot?.url) {
+          screenshotUrl = data.data.screenshot.url;
+          console.log('Screenshot URL obtained:', screenshotUrl);
+          
+          // Download the screenshot
+          const imgResponse = await fetch(screenshotUrl);
+          if (imgResponse.ok) {
+            const screenshotBuffer = await imgResponse.arrayBuffer();
+            
+            // Upload to Supabase storage for caching
+            const { error: uploadError } = await supabase.storage
+              .from('videos')
+              .upload(cacheKey, screenshotBuffer, {
+                contentType: 'image/jpeg',
+                upsert: true
+              });
 
-    if (uploadError) {
-      console.error('Error caching screenshot:', uploadError);
+            if (uploadError) {
+              console.error('Error caching screenshot:', uploadError);
+            } else {
+              console.log('Screenshot cached successfully');
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+              .from('videos')
+              .getPublicUrl(cacheKey);
+
+            return new Response(
+              JSON.stringify({ screenshotUrl: publicUrl, cached: false }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        }
+      } else {
+        console.log('Microlink API returned status:', response.status);
+      }
+    } catch (apiError) {
+      const errorMsg = apiError instanceof Error ? apiError.message : 'Unknown error';
+      console.log('Microlink API error:', errorMsg);
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('videos')
-      .getPublicUrl(cacheKey);
-
-    console.log(`Screenshot generated via ${successService} and cached:`, publicUrl);
-
+    // If screenshot generation failed, return a graceful fallback
+    console.log('Screenshot generation failed, returning fallback');
     return new Response(
-      JSON.stringify({ screenshotUrl: publicUrl, cached: false }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        screenshotUrl: null, 
+        error: 'Screenshot generation unavailable',
+        fallback: true 
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
 
   } catch (error) {
     console.error('Error in generate-screenshot function:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     
-    // Return a graceful error that the frontend can handle
+    // Always return 200 with fallback flag to prevent breaking the UI
     return new Response(
       JSON.stringify({ 
         screenshotUrl: null, 
