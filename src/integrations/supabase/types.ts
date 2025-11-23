@@ -62,6 +62,7 @@ export type Database = {
           resume_score: number | null
           resume_url: string
           skill_tags: string[] | null
+          summary: string | null
           thumbnail_url: string | null
           transcription: string | null
           updated_at: string
@@ -79,6 +80,7 @@ export type Database = {
           resume_score?: number | null
           resume_url: string
           skill_tags?: string[] | null
+          summary?: string | null
           thumbnail_url?: string | null
           transcription?: string | null
           updated_at?: string
@@ -96,6 +98,7 @@ export type Database = {
           resume_score?: number | null
           resume_url?: string
           skill_tags?: string[] | null
+          summary?: string | null
           thumbnail_url?: string | null
           transcription?: string | null
           updated_at?: string
