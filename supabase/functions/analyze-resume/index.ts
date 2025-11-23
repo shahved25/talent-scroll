@@ -11,6 +11,7 @@ interface ResumeAnalysis {
   strengths: string[];
   improvements: string[];
   summary: string;
+  detailedSummary: string;
 }
 
 Deno.serve(async (req) => {
@@ -89,13 +90,19 @@ Provide:
 2. Top 3-4 key strengths (specific bullet points)
 3. Top 3-4 areas for improvement (actionable bullet points)
 4. A concise 2-3 sentence summary
+5. A detailed summary (2-3 paragraphs) that includes:
+   - Overview of the candidate's background and experience
+   - PROS: Key strengths and advantages (be specific about skills, experience, achievements)
+   - CONS: Areas of concern or improvement needed (be constructive and specific)
+   - Overall hiring recommendation and fit for the role
 
 Respond ONLY with valid JSON in this exact format:
 {
   "score": 85,
   "strengths": ["Strong technical skills", "Relevant experience"],
   "improvements": ["Add more metrics", "Include certifications"],
-  "summary": "Strong candidate with relevant experience."
+  "summary": "Strong candidate with relevant experience.",
+  "detailedSummary": "This candidate brings 5+ years of backend development experience with strong expertise in Node.js and Python.\n\nPROS: Demonstrated track record at major tech companies, extensive microservices architecture experience, strong database optimization skills, active open-source contributor.\n\nCONS: Limited cloud platform experience beyond AWS, no mention of team leadership experience, resume lacks quantifiable metrics for achievements.\n\nOverall, this is a strong technical candidate who would be an excellent fit for senior backend engineer roles, though may need support in cloud technologies and leadership development."
 }`
               },
               {
@@ -134,12 +141,15 @@ Respond ONLY with valid JSON in this exact format:
     
     console.log('Analysis complete, score:', analysis.score);
 
-    // Update candidate record with resume score
+    // Update candidate record with resume score and summary
     if (candidateId) {
-      console.log('Updating database with score:', analysis.score);
+      console.log('Updating database with score and summary:', analysis.score);
       const { error: updateError } = await supabase
         .from('candidates')
-        .update({ resume_score: analysis.score })
+        .update({ 
+          resume_score: analysis.score,
+          summary: analysis.detailedSummary 
+        })
         .eq('id', candidateId);
 
       if (updateError) {
@@ -147,7 +157,7 @@ Respond ONLY with valid JSON in this exact format:
         throw updateError;
       }
       
-      console.log('Resume score saved successfully');
+      console.log('Resume score and summary saved successfully');
       
       // Check if video analysis is complete before calculating final score
       const { data: candidateCheck } = await supabase
@@ -202,7 +212,8 @@ Respond ONLY with valid JSON in this exact format:
         score: 0,
         strengths: [],
         improvements: [],
-        summary: 'Unable to analyze resume at this time.'
+        summary: 'Unable to analyze resume at this time.',
+        detailedSummary: 'Unable to analyze resume at this time.'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
