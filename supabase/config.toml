@@ -11,6 +11,3 @@ verify_jwt = false
 
 [functions.calculate-final-score]
 verify_jwt = false
-
-[functions.generate-screenshot]
-verify_jwt = false

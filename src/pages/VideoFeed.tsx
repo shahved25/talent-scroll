@@ -4,7 +4,6 @@ import { ArrowLeft, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
 import ResumePanel from "@/components/ResumePanel";
-import PortfolioPanel from "@/components/PortfolioPanel";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Candidate {
@@ -18,7 +17,6 @@ interface Candidate {
   resumeScore: number | null;
   videoScore: number | null;
   englishProficiency: number | null;
-  portfolioUrls: string[] | null;
 }
 
 const VideoFeed = () => {
@@ -27,7 +25,6 @@ const VideoFeed = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showResumeModal, setShowResumeModal] = useState(false);
-  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,7 +41,7 @@ const VideoFeed = () => {
 
       const { data } = await supabase
         .from('candidates')
-        .select('id, name, video_url, resume_url, thumbnail_url, skill_tags, resume_score, video_score, english_proficiency, portfolio_url')
+        .select('id, name, video_url, resume_url, thumbnail_url, skill_tags, resume_score, video_score, english_proficiency')
         .eq('category_id', categoryData.id);
 
       if (data) {
@@ -59,7 +56,6 @@ const VideoFeed = () => {
           resumeScore: candidate.resume_score,
           videoScore: candidate.video_score,
           englishProficiency: candidate.english_proficiency,
-          portfolioUrls: candidate.portfolio_url,
         }));
         setCandidates(formattedCandidates);
       }
@@ -157,7 +153,6 @@ const VideoFeed = () => {
             candidate={candidate}
             isActive={index === currentIndex}
             onSwipeRight={() => setShowResumeModal(true)}
-            onPortfolioOpen={() => setShowPortfolioModal(true)}
           />
         ))}
       </div>
@@ -166,13 +161,6 @@ const VideoFeed = () => {
       <ResumePanel
         isOpen={showResumeModal}
         onClose={() => setShowResumeModal(false)}
-        candidate={candidates[currentIndex]}
-      />
-
-      {/* Portfolio Panel */}
-      <PortfolioPanel
-        isOpen={showPortfolioModal}
-        onClose={() => setShowPortfolioModal(false)}
         candidate={candidates[currentIndex]}
       />
 
