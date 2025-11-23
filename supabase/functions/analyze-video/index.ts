@@ -6,6 +6,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Retry configuration for Groq API
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+
+async function retryWithBackoff(fn: () => Promise<Response>, retries = MAX_RETRIES): Promise<Response> {
+  try {
+    const response = await fn();
+    
+    // Handle rate limiting
+    if (response.status === 429) {
+      if (retries > 0) {
+        const delay = INITIAL_RETRY_DELAY * (MAX_RETRIES - retries + 1);
+        console.log(`Rate limited. Retrying in ${delay}ms... (${retries} retries left)`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return retryWithBackoff(fn, retries - 1);
+      }
+      throw new Error('Groq API rate limit exceeded. Please try again later.');
+    }
+    
+    // Handle server errors with retry
+    if (response.status >= 500 && retries > 0) {
+      const delay = INITIAL_RETRY_DELAY * (MAX_RETRIES - retries + 1);
+      console.log(`Server error. Retrying in ${delay}ms... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return retryWithBackoff(fn, retries - 1);
+    }
+    
+    return response;
+  } catch (error) {
+    if (retries > 0) {
+      const delay = INITIAL_RETRY_DELAY * (MAX_RETRIES - retries + 1);
+      console.log(`Request failed. Retrying in ${delay}ms... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return retryWithBackoff(fn, retries - 1);
+    }
+    throw error;
+  }
+}
+
 interface VideoAnalysis {
   score: number;
   communication_skills: number;
@@ -33,23 +72,24 @@ Deno.serve(async (req) => {
       throw new Error('GROQ_API_KEY is not configured');
     }
 
-    // Call Groq API for intelligent video analysis
-    const aiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${groqApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert HR recruiter evaluating candidate video interviews for ${category} positions.`
-          },
-          {
-            role: 'user',
-            content: `Analyze this video interview transcription and provide detailed insights:
+    // Call Groq API for intelligent video analysis with retry logic
+    const aiResponse = await retryWithBackoff(() =>
+      fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${groqApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert HR recruiter evaluating candidate video interviews for ${category} positions.`
+            },
+            {
+              role: 'user',
+              content: `Analyze this video interview transcription and provide detailed insights:
 
 TRANSCRIPTION:
 ${transcription}
@@ -86,12 +126,13 @@ Respond ONLY with valid JSON in this exact format:
   "red_flags": ["Mentioned lacking experience in X"],
   "summary": "Strong candidate with excellent communication skills."
 }`
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1500
-      }),
-    });
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 1200
+        }),
+      })
+    );
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
