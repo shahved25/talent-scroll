@@ -4,7 +4,6 @@ import { ArrowLeft, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
 import ResumePanel from "@/components/ResumePanel";
-import PortfolioPanel from "@/components/PortfolioPanel";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Candidate {
@@ -13,7 +12,6 @@ interface Candidate {
   category: string;
   videoUrl: string;
   resumeUrl: string;
-  portfolioUrl: string | null;
   thumbnailUrl: string | null;
   skillTags: string[];
   resumeScore: number | null;
@@ -27,7 +25,6 @@ const VideoFeed = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showResumeModal, setShowResumeModal] = useState(false);
-  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,7 +41,7 @@ const VideoFeed = () => {
 
       const { data } = await supabase
         .from('candidates')
-        .select('id, name, video_url, resume_url, portfolio_url, thumbnail_url, skill_tags, resume_score, video_score, english_proficiency')
+        .select('id, name, video_url, resume_url, thumbnail_url, skill_tags, resume_score, video_score, english_proficiency')
         .eq('category_id', categoryData.id);
 
       if (data) {
@@ -54,7 +51,6 @@ const VideoFeed = () => {
           category: categoryData.name,
           videoUrl: candidate.video_url,
           resumeUrl: candidate.resume_url,
-          portfolioUrl: candidate.portfolio_url,
           thumbnailUrl: candidate.thumbnail_url,
           skillTags: candidate.skill_tags || [],
           resumeScore: candidate.resume_score,
@@ -157,7 +153,6 @@ const VideoFeed = () => {
             candidate={candidate}
             isActive={index === currentIndex}
             onSwipeRight={() => setShowResumeModal(true)}
-            onPortfolioClick={() => setShowPortfolioModal(true)}
           />
         ))}
       </div>
@@ -166,13 +161,6 @@ const VideoFeed = () => {
       <ResumePanel
         isOpen={showResumeModal}
         onClose={() => setShowResumeModal(false)}
-        candidate={candidates[currentIndex]}
-      />
-
-      {/* Portfolio Panel */}
-      <PortfolioPanel
-        isOpen={showPortfolioModal}
-        onClose={() => setShowPortfolioModal(false)}
         candidate={candidates[currentIndex]}
       />
 
