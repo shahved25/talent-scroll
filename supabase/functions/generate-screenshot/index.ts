@@ -29,7 +29,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Generate a cache key from the URL
-    const cacheKey = `screenshots/${btoa(url).replace(/[^a-zA-Z0-9]/g, '')}.png`;
+    const cacheKey = `screenshots/${btoa(url).replace(/[^a-zA-Z0-9]/g, '')}.jpg`;
 
     // Check if screenshot already exists in storage
     const { data: existingFile } = await supabase.storage
@@ -50,15 +50,19 @@ serve(async (req) => {
       );
     }
 
-    // Use free screenshot service
-    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?url=${encodeURIComponent(url)}&output=image&file_type=png&wait_for_event=load`;
+    // Use free screenshot service (thum.io - no API key required)
+    const screenshotUrl = `https://image.thum.io/get/width/1200/crop/800/noanimate/${encodeURIComponent(url)}`;
     
     console.log('Fetching screenshot from API...');
     const screenshotResponse = await fetch(screenshotUrl);
     
     if (!screenshotResponse.ok) {
-      throw new Error('Failed to generate screenshot');
+      const errorText = await screenshotResponse.text();
+      console.error('Screenshot API error:', screenshotResponse.status, errorText);
+      throw new Error(`Failed to generate screenshot: ${screenshotResponse.status}`);
     }
+    
+    console.log('Screenshot fetched successfully, status:', screenshotResponse.status);
 
     const screenshotBlob = await screenshotResponse.blob();
     const screenshotBuffer = await screenshotBlob.arrayBuffer();
@@ -67,7 +71,7 @@ serve(async (req) => {
     const { error: uploadError } = await supabase.storage
       .from('videos')
       .upload(cacheKey, screenshotBuffer, {
-        contentType: 'image/png',
+        contentType: 'image/jpeg',
         upsert: true
       });
 
