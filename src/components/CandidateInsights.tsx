@@ -74,27 +74,6 @@ const CandidateInsights = ({ resumeScore, videoScore, className = "" }: Candidat
           </Card>
         )}
 
-        {/* Video Score */}
-        {videoScore && (
-          <Card className="p-4 border-2 border-secondary/30 bg-card/50 backdrop-blur-sm hover:border-secondary hover:shadow-[0_0_20px_hsl(160_100%_65%/0.2)] transition-all duration-300 animate-slide-in-right">
-            <div className="flex items-center gap-3 mb-3">
-              <Video className="h-5 w-5 text-secondary" />
-              <span className="text-sm font-mono text-muted-foreground">VIDEO ANALYSIS</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className={`text-4xl font-bold ${getScoreColor(videoScore).split(' ')[0]}`}>
-                {videoScore}
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground">/100</span>
-                <Badge className={`${getScoreColor(videoScore)} backdrop-blur-sm font-mono text-xs`}>
-                  {videoScore >= 80 ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <AlertTriangle className="h-3 w-3 mr-1" />}
-                  {videoScore >= 80 ? "EXCELLENT" : videoScore >= 60 ? "SOLID" : "NEEDS WORK"}
-                </Badge>
-              </div>
-            </div>
-          </Card>
-        )}
       </div>
 
       {/* AI Badge */}
