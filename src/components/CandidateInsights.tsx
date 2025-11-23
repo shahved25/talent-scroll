@@ -50,29 +50,6 @@ const CandidateInsights = ({ resumeScore, videoScore, className = "" }: Candidat
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Overall Score Card */}
-      {overallScore && (
-        <Card className="p-6 border-2 border-primary/40 bg-gradient-to-br from-primary/10 via-card/50 to-secondary/10 backdrop-blur-sm animate-scale-in">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className={`text-6xl font-bold ${getScoreColor(overallScore).split(' ')[0]} animate-float`}>
-                {overallScore}
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-mono text-muted-foreground">AI OVERALL SCORE</span>
-                </div>
-                <Badge className={`${getScoreColor(overallScore)} backdrop-blur-sm font-mono text-lg px-4 py-1 w-fit`}>
-                  GRADE: {getScoreGrade(overallScore)}
-                </Badge>
-              </div>
-            </div>
-            <TrendingUp className="h-12 w-12 text-primary/30 animate-pulse" />
-          </div>
-        </Card>
-      )}
-
       {/* Individual Scores Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Resume Score */}
