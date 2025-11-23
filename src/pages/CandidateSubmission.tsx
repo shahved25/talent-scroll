@@ -23,6 +23,8 @@ const CandidateSubmission = () => {
   
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [projectUrl, setProjectUrl] = useState("");
+  const [projects, setProjects] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -86,6 +88,7 @@ const CandidateSubmission = () => {
           resume_url: resumeUrl,
           video_url: videoUrl,
           skill_tags: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
+          portfolio_url: projects.length > 0 ? projects : null,
         })
         .select()
         .single();
@@ -212,6 +215,51 @@ const CandidateSubmission = () => {
                 rows={3}
                 className="border-primary/30 focus:border-primary transition-all duration-300"
               />
+            </div>
+
+            <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.55s' }}>
+              <Label htmlFor="projects" className="text-primary font-mono">Project URLs</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="projects"
+                  type="url"
+                  value={projectUrl}
+                  onChange={(e) => setProjectUrl(e.target.value)}
+                  placeholder="https://github.com/yourproject"
+                  className="border-primary/30 focus:border-primary transition-all duration-300"
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (projectUrl.trim()) {
+                      setProjects([...projects, projectUrl.trim()]);
+                      setProjectUrl("");
+                    }
+                  }}
+                  variant="outline"
+                  className="border-primary/30 hover:bg-primary/10"
+                >
+                  Add
+                </Button>
+              </div>
+              {projects.length > 0 && (
+                <div className="space-y-2 mt-2">
+                  {projects.map((project, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm text-primary font-mono animate-fade-in bg-primary/5 p-2 rounded">
+                      <span className="flex-1 truncate">{project}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setProjects(projects.filter((_, i) => i !== index))}
+                        className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 animate-slide-up-fade" style={{ animationDelay: '0.6s' }}>
