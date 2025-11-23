@@ -62,10 +62,20 @@ const PortfolioPanel = ({ isOpen, onClose, candidate }: PortfolioPanelProps) => 
 
         if (error) throw error;
 
-        setScreenshots(prev => ({
-          ...prev,
-          [url]: data.screenshotUrl
-        }));
+        // Handle graceful fallback from edge function
+        if (data.fallback || !data.screenshotUrl) {
+          console.log('Screenshot unavailable for', url, '- using fallback');
+          setErrorScreenshots(prev => ({
+            ...prev,
+            [url]: true
+          }));
+        } else {
+          setScreenshots(prev => ({
+            ...prev,
+            [url]: data.screenshotUrl
+          }));
+        }
+        
         setLoadingScreenshots(prev => ({
           ...prev,
           [url]: false

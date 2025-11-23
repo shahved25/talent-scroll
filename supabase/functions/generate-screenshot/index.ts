@@ -29,13 +29,14 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Generate a cache key from the URL
-    const cacheKey = `screenshots/${btoa(url).replace(/[^a-zA-Z0-9]/g, '')}.jpg`;
+    const urlHash = btoa(url).replace(/[^a-zA-Z0-9]/g, '').substring(0, 50);
+    const cacheKey = `screenshots/${urlHash}.jpg`;
 
     // Check if screenshot already exists in storage
     const { data: existingFile } = await supabase.storage
       .from('videos')
       .list('screenshots', {
-        search: btoa(url).replace(/[^a-zA-Z0-9]/g, '')
+        search: urlHash
       });
 
     if (existingFile && existingFile.length > 0) {
@@ -50,21 +51,58 @@ serve(async (req) => {
       );
     }
 
-    // Use free screenshot service (thum.io - no API key required)
-    const screenshotUrl = `https://image.thum.io/get/width/1200/crop/800/noanimate/${encodeURIComponent(url)}`;
-    
-    console.log('Fetching screenshot from API...');
-    const screenshotResponse = await fetch(screenshotUrl);
-    
-    if (!screenshotResponse.ok) {
-      const errorText = await screenshotResponse.text();
-      console.error('Screenshot API error:', screenshotResponse.status, errorText);
-      throw new Error(`Failed to generate screenshot: ${screenshotResponse.status}`);
-    }
-    
-    console.log('Screenshot fetched successfully, status:', screenshotResponse.status);
+    // Try multiple screenshot services with fallbacks
+    const services = [
+      {
+        name: 'screenshotmachine',
+        url: `https://api.screenshotmachine.com/?key=demo&url=${encodeURIComponent(url)}&dimension=1200x800`
+      },
+      {
+        name: 'apiflash-demo',
+        url: `https://api.apiflash.com/v1/urltoimage?access_key=demo&url=${encodeURIComponent(url)}&width=1200&height=800&fresh=true`
+      }
+    ];
 
-    const screenshotBlob = await screenshotResponse.blob();
+    let screenshotBlob = null;
+    let successService = null;
+
+    for (const service of services) {
+      try {
+        console.log(`Trying ${service.name}...`);
+        const screenshotResponse = await fetch(service.url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; ScreenshotBot/1.0)'
+          }
+        });
+        
+        if (screenshotResponse.ok) {
+          screenshotBlob = await screenshotResponse.blob();
+          successService = service.name;
+          console.log(`Success with ${service.name}`);
+          break;
+        } else {
+          console.log(`${service.name} failed with status:`, screenshotResponse.status);
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        console.log(`${service.name} error:`, errorMsg);
+        continue;
+      }
+    }
+
+    // If all services failed, return a graceful error that the frontend can handle
+    if (!screenshotBlob) {
+      console.log('All screenshot services failed, returning fallback response');
+      return new Response(
+        JSON.stringify({ 
+          screenshotUrl: null, 
+          error: 'Screenshot generation unavailable',
+          fallback: true 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    }
+
     const screenshotBuffer = await screenshotBlob.arrayBuffer();
 
     // Upload to Supabase storage for caching
@@ -83,7 +121,7 @@ serve(async (req) => {
       .from('videos')
       .getPublicUrl(cacheKey);
 
-    console.log('Screenshot generated and cached:', publicUrl);
+    console.log(`Screenshot generated via ${successService} and cached:`, publicUrl);
 
     return new Response(
       JSON.stringify({ screenshotUrl: publicUrl, cached: false }),
@@ -93,9 +131,15 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in generate-screenshot function:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    
+    // Return a graceful error that the frontend can handle
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      JSON.stringify({ 
+        screenshotUrl: null, 
+        error: errorMessage,
+        fallback: true 
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   }
 });
