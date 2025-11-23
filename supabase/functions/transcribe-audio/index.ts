@@ -6,6 +6,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Retry configuration for Groq API
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+
+async function retryWithBackoff(fn: () => Promise<Response>, retries = MAX_RETRIES): Promise<Response> {
+  try {
+    const response = await fn();
+    
+    // Handle rate limiting
+    if (response.status === 429) {
+      if (retries > 0) {
+        const delay = INITIAL_RETRY_DELAY * (MAX_RETRIES - retries + 1);
+        console.log(`Rate limited. Retrying in ${delay}ms... (${retries} retries left)`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return retryWithBackoff(fn, retries - 1);
+      }
+      throw new Error('Groq API rate limit exceeded. Please try again later.');
+    }
+    
+    // Handle server errors with retry
+    if (response.status >= 500 && retries > 0) {
+      const delay = INITIAL_RETRY_DELAY * (MAX_RETRIES - retries + 1);
+      console.log(`Server error. Retrying in ${delay}ms... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return retryWithBackoff(fn, retries - 1);
+    }
+    
+    return response;
+  } catch (error) {
+    if (retries > 0) {
+      const delay = INITIAL_RETRY_DELAY * (MAX_RETRIES - retries + 1);
+      console.log(`Request failed. Retrying in ${delay}ms... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return retryWithBackoff(fn, retries - 1);
+    }
+    throw error;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -40,14 +79,16 @@ Deno.serve(async (req) => {
     formData.append('file', videoBlob, 'video.mp4');
     formData.append('model', 'whisper-large-v3');
 
-    // Send to Groq Whisper for transcription
-    const transcriptionResponse = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${groqApiKey}`,
-      },
-      body: formData,
-    });
+    // Send to Groq Whisper for transcription with retry logic
+    const transcriptionResponse = await retryWithBackoff(() => 
+      fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${groqApiKey}`,
+        },
+        body: formData,
+      })
+    );
 
     if (!transcriptionResponse.ok) {
       const errorText = await transcriptionResponse.text();
