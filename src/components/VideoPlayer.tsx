@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Heart, FileText, X } from "lucide-react";
+import { Heart, FileText, Briefcase } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,15 +19,17 @@ interface Candidate {
   resumeScore: number | null;
   videoScore: number | null;
   englishProficiency: number | null;
+  portfolioUrls: string[] | null;
 }
 
 interface VideoPlayerProps {
   candidate: Candidate;
   isActive: boolean;
   onSwipeRight: () => void;
+  onPortfolioOpen: () => void;
 }
 
-const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) => {
+const VideoPlayer = ({ candidate, isActive, onSwipeRight, onPortfolioOpen }: VideoPlayerProps) => {
   const [isShortlisted, setIsShortlisted] = useState(false);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -262,6 +264,17 @@ const VideoPlayer = ({ candidate, isActive, onSwipeRight }: VideoPlayerProps) =>
             <FileText className="h-6 w-6 group-hover:animate-pulse" />
             <div className="absolute inset-0 rounded-full border-2 border-primary/50 animate-ping-slow" />
           </button>
+
+          {/* Portfolio Button (visible on desktop if portfolio exists) */}
+          {candidate.portfolioUrls && candidate.portfolioUrls.length > 0 && (
+            <button
+              onClick={onPortfolioOpen}
+              className="absolute bottom-24 right-24 hidden md:flex h-14 w-14 items-center justify-center rounded-full bg-secondary text-secondary-foreground shadow-[0_0_30px_hsl(280_100%_60%/0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_hsl(280_100%_60%/0.7)] group"
+            >
+              <Briefcase className="h-6 w-6 group-hover:animate-pulse" />
+              <div className="absolute inset-0 rounded-full border-2 border-secondary/50 animate-ping-slow" />
+            </button>
+          )}
         </AspectRatio>
       </div>
     </div>
