@@ -90,11 +90,10 @@ Provide:
 2. Top 3-4 key strengths (specific bullet points)
 3. Top 3-4 areas for improvement (actionable bullet points)
 4. A concise 2-3 sentence summary
-5. A detailed summary (2-3 paragraphs) that includes:
-   - Overview of the candidate's background and experience
-   - PROS: Key strengths and advantages (be specific about skills, experience, achievements)
-   - CONS: Areas of concern or improvement needed (be constructive and specific)
-   - Overall hiring recommendation and fit for the role
+5. A detailed summary in exactly 3-4 bullet points that covers:
+   - Key strengths/pros (be specific and concise)
+   - Main concerns/cons (be constructive)
+   - Overall fit for the role
 
 Respond ONLY with valid JSON in this exact format:
 {
@@ -102,7 +101,7 @@ Respond ONLY with valid JSON in this exact format:
   "strengths": ["Strong technical skills", "Relevant experience"],
   "improvements": ["Add more metrics", "Include certifications"],
   "summary": "Strong candidate with relevant experience.",
-  "detailedSummary": "This candidate brings 5+ years of backend development experience with strong expertise in Node.js and Python.\n\nPROS: Demonstrated track record at major tech companies, extensive microservices architecture experience, strong database optimization skills, active open-source contributor.\n\nCONS: Limited cloud platform experience beyond AWS, no mention of team leadership experience, resume lacks quantifiable metrics for achievements.\n\nOverall, this is a strong technical candidate who would be an excellent fit for senior backend engineer roles, though may need support in cloud technologies and leadership development."
+  "detailedSummary": "• 5+ years backend experience with Node.js/Python and strong microservices architecture at major tech companies\n• Excellent database optimization skills and active open-source contributor\n• Limited cloud platform experience beyond AWS and lacks quantifiable achievement metrics\n• Strong technical fit for senior roles, may need support in cloud technologies"
 }`
               },
               {
